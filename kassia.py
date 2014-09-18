@@ -36,23 +36,30 @@ class Kassia:
             bnmlTree = ET.parse(self.fileName)
             bnml = bnmlTree.getroot()
             self.bnml = bnml   
-            # for each hymn
-            #for troparion in bnml:
-            #    neumesText = " ".join(troparion.find('neumes').text.strip().split())
-            #    lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
-                
-                
+               
         except ET.ParseError:
             print "Failed to parse XML file"
             
     def createPDF(self):
         """Create PDF output file"""
-        # TODO: Page layout and formatting
+        # TODO: Parse page layout and formatting
+        self.paperSize = letter
+        self.topmargin = 72
+        self.bottommargin = 72
+        self.leftmargin = 72
+        self.rightmargin = 72
+        self.lineHeight = 72
+        self.lineWidth = self.paperSize[0] - (self.leftmargin + self.rightmargin)
         
         # For each tropar
         for troparion in self.bnml.iter('troparion'):
             neumesText = " ".join(troparion.find('neumes').text.strip().split())
             lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
+            
+            
+    def linebreak(self):
+        """Break neumes and lyrics into lines"""
+        
         
 
 def main(argv):
