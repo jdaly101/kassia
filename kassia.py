@@ -15,10 +15,10 @@ class Cursor:
         
 class Kassia:
     """Base class for package"""
-    def __init__(self,fileName):
+    def __init__(self,fileName,outFile = "out.pdf"):
         print "Making a Kassia..."
         self.fileName = fileName # input file
-        #self.outFile = outFile # output file
+        self.outFile = outFile # output file
         try:
             open(fileName,"r")
             fileReadable = True
@@ -51,22 +51,40 @@ class Kassia:
         self.lineHeight = 72
         self.lineWidth = self.paperSize[0] - (self.leftmargin + self.rightmargin)
         
+        psalticaTTF = "fonts/EZ Psaltica.TTF"
+        oxeiaTTF    = "fonts/EZ Oxeia.ttf"
+        pdfmetrics.registerFont(TTFont("EZPsaltica",psalticaTTF,asciiReadable=True))
+        pdfmetrics.registerFont(TTFont("EZOxeia",oxeiaTTF))
+        
+        c = canvas.Canvas(self.outFile,pagesize = letter)
+        
         # For each tropar
         for troparion in self.bnml.iter('troparion'):
             neumesText = " ".join(troparion.find('neumes').text.strip().split())
             lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
+            self.linebreak(neumesText,lyricsText)
             
-            
-    def linebreak(self):
+    def linebreak(self,neumes,lyrics = None):
         """Break neumes and lyrics into lines"""
-        
+        cr = Cursor(0,0)
+        # If lyric spans multiple neumes
+        #   then see if lyric is wider than span
+        #   else see if width of glypch is max of neume and lyric
+        neumeArray = neume_dict.translate(neumes).split(' ')
+        for neume in neumeArray:
+            print("Neume length: " + str(pdfmetrics.stringWidth(neume,'EZPsaltica',24)))
         
 
 def main(argv):
-    print "In main..."
-    kas = Kassia(argv[0])
+    if len(argv) == 1:
+        kas = Kassia(argv[0])
+    elif len(argv) > 1:
+        kas = Kassia(argv[0],argv[1])
     
 if __name__ == "__main__":
     print "Starting up..."
+    if len(sys.argv) == 1:
+        print "Input XML file required"
+        sys.exit(1)
     main(sys.argv[1:])
             
