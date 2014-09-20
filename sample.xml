@@ -1,0 +1,49 @@
+<bnml>
+
+<troparion>
+    <title>
+        Lord I have cried
+    </title>
+    <tone>
+        1
+    </tone>
+    <rightannotation type="chronos" symbol="argon">
+        84
+    </rightannotation>
+    <rightannotation>
+        Kyrie ekekraxa
+    </rightannotation>
+    <neumes>
+        O S ! ! 1 1 \' ! ! ; " ! s \ 0 ! s 1 w ! 
+        A | v V J 3 z U U S ! _ 1 " s ! 0 a v V 1 ~ 
+    </neumes>
+    <lyrics>
+        Lord,_ I have cried_ un-to_ Thee,_ heark-en un-to me; 
+        hear-ken_ un-to_ me,_ O_ Lord.
+    </lyrics>
+</troparion>
+
+</bnml>
+<!--
+o = oligon
+o3 = oligon up 3
+a = apostrophos
+i = ison
+p = petaste
+p2 = petaste up 2
+s = syneches elaphron
+
+v = vareia
+r = rest
+
++g = gorgon
++a = apli
++k = klasma
+
+:a = antikenoma
+:o = omalon
+:e = eteron (or link)
+
+-->
+
+
