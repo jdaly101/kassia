@@ -58,11 +58,24 @@ class Kassia:
         
         c = canvas.Canvas(self.outFile,pagesize = letter)
         
+        
         # For each tropar
         for troparion in self.bnml.iter('troparion'):
             neumesText = " ".join(troparion.find('neumes').text.strip().split())
             lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
-            self.linebreak(neumesText,lyricsText)
+            nPos = self.linebreak(neumesText,lyricsText)
+            
+            for glyph in nPos:
+                c.setFont("EZPsaltica",24)
+                c.drawString(glyph[0]+self.leftmargin,glyph[1] + 600,glyph[2])
+                print glyph
+                
+        c.showPage()
+        try:
+            c.save()
+        except IOError:
+            print "Could not save file"
+            
             
     def linebreak(self,neumes,lyrics = None):
         """Break neumes and lyrics into lines"""
@@ -71,8 +84,24 @@ class Kassia:
         #   then see if lyric is wider than span
         #   else see if width of glypch is max of neume and lyric
         neumeArray = neume_dict.translate(neumes).split(' ')
+        neumePos = []
         for neume in neumeArray:
-            print("Neume length: " + str(pdfmetrics.stringWidth(neume,'EZPsaltica',24)))
+            #print("Neume length: " + str(pdfmetrics.stringWidth(neume,'EZPsaltica',24)))
+            nWidth = pdfmetrics.stringWidth(neume,'EZPsaltica',24)
+            if nWidth > 1.0: # if it's not a gorgon or other small symbol
+                if (nWidth + cr.x) >= self.lineWidth: # line break
+                    cr.x, cr.y = 0, cr.y - self.lineHeight
+                    neumePos.append((cr.x,cr.y,neume))
+                else: # no line break
+                    neumePos.append((cr.x,cr.y,neume))
+                cr.x += nWidth
+            else:
+                # offset for gorgon
+                # offset for apli
+                neumePos.append((cr.x,cr.y,neume))
+            
+        print neumePos
+        return neumePos
         
 
 def main(argv):
