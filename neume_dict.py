@@ -5,8 +5,13 @@ def translate(text):
     splitText = text.split(" ")
     tmpText = [ezPsaltica[t] if ezPsaltica.has_key(t) else t for t in splitText]
     return u' '.join(tmpText)
-    
-
+     
+def takesLyric(neume):
+    if neume in neumesWithLyrics:
+        return True
+    else:
+        return False
+     
 ezPsaltica = {
     #' ' : u'\uF020',
     '0' : u'\uF030',
@@ -105,3 +110,7 @@ ezPsaltica = {
     '>' : u'\uF03E',
     '?' : u'\uF03F',
     '<' : u'\uF03C'}
+    
+neumesWithLyrics = ['0','p','1','2','3','4','5','6','7','8','9','`','=','q','w','e','r',
+              't','y','u','i','!','@','-',')','-','#','#','%','^','&','*','(','Q',
+              'W','E','O','o','l','L','P','I','U','Y','T','R']

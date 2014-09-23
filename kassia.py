@@ -51,11 +51,15 @@ class Kassia:
         self.rightmargin = 72
         self.lineHeight = 72
         self.lineWidth = self.paperSize[0] - (self.leftmargin + self.rightmargin)
+        self.nFontSize = 20
+        self.lFontSize = 12
         
         psalticaTTF = "fonts/EZ Psaltica.TTF"
         oxeiaTTF    = "fonts/EZ Oxeia.ttf"
+        omegaTTF    = "fonts/EZ Omega.ttf"
         pdfmetrics.registerFont(TTFont("EZPsaltica",psalticaTTF,asciiReadable=True))
         pdfmetrics.registerFont(TTFont("EZOxeia",oxeiaTTF))
+        pdfmetrics.registerFont(TTFont("EZOmega",omegaTTF))
         
         c = canvas.Canvas(self.outFile,pagesize = letter)
         
@@ -64,13 +68,17 @@ class Kassia:
         for troparion in self.bnml.iter('troparion'):
             neumesText = " ".join(troparion.find('neumes').text.strip().split())
             lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
-            nPos = self.linebreak(neumesText,lyricsText)
+            nPos,lPos = self.linebreak(neumesText,lyricsText)
             
             for glyph in nPos:
-                c.setFont("EZPsaltica",20)
+                c.setFont("EZPsaltica",self.nFontSize)
                 c.drawString(glyph[0]+self.leftmargin,glyph[1] + 600,glyph[2])
                 print glyph
-                
+            for lyric in lPos:
+                c.setFont("EZOmega",self.lFontSize)
+                c.drawString(lyric[0]+self.leftmargin,lyric[1] + 600,lyric[2])
+                print lyric
+            
         c.showPage()
         try:
             c.save()
@@ -87,21 +95,42 @@ class Kassia:
         #   else see if width of glypch is max of neume and lyric
         charSpace = 4 # default space between characters
         textOffset = 30 # default space lyrics appear below neumes
-        neumeArray = neume_dict.translate(neumes).split(' ')
+        #neumeArray = neume_dict.translate(neumes).split(' ')
+        neumeArray = neumes.split(' ')
         neumePos = []
-        lyrIdx = 0
+        lyricPos = []
+        lyricIdx = 0
         for neume in neumeArray:
             #print("Neume length: " + str(pdfmetrics.stringWidth(neume,'EZPsaltica',24)))
-            nWidth = pdfmetrics.stringWidth(neume,'EZPsaltica',20)
+            nWidth = pdfmetrics.stringWidth(neume_dict.translate(neume),'EZPsaltica',self.nFontSize)
             if nWidth > 1.0: # if it's not a gorgon or other small symbol
-                if (nWidth + cr.x) >= self.lineWidth: # line break
+                # Neume might take lyric
+                if lyricIdx < len(lyricArray):
+                    lyr = lyricArray[lyricIdx]
+                else:
+                    lyr = ""
+                lWidth = pdfmetrics.stringWidth(lyr,'EZOmega',self.lFontSize)
+                # Glyph width will be the max of the two if lyric isn't stretched out
+                # across multiple neumes
+                addLyric = False
+                #if (lyr[-1] != "_") & (neume_dict.takesLyric(neume)):
+                if (neume_dict.takesLyric(neume)):
+                    glWidth = max(nWidth,lWidth)
+                    lyricIdx += 1
+                    addLyric = True
+                else:
+                    glWidth = nWidth
+                if (glWidth + cr.x) >= self.lineWidth: # line break
                     cr.x, cr.y = 0, cr.y - self.lineHeight
                     # does it take a lyric syllable?
-                    neumePos.append((cr.x,cr.y,neume))
+                    neumePos.append((cr.x,cr.y,neume_dict.translate(neume)))
                 else: # no line break
                     # does it take a lyric syllable?
-                    neumePos.append((cr.x,cr.y,neume))
-                cr.x += nWidth + charSpace
+                    neumePos.append((cr.x,cr.y,neume_dict.translate(neume)))
+                if (addLyric):
+                    lyricPos.append((cr.x,cr.y-textOffset,lyr))
+                cr.x += glWidth + charSpace
+                
             else:
                 # offsets for gorgon
                 # offsets for apli
@@ -109,10 +138,10 @@ class Kassia:
                 # offsets for omalon
                 # offsets for antikenoma
                 # offsets for eteron
-                neumePos.append((cr.x - charSpace,cr.y,neume))
+                neumePos.append((cr.x - charSpace,cr.y,neume_dict.translate(neume)))
             
         #print neumePos
-        return neumePos
+        return neumePos, lyricPos
         
 
 def main(argv):
