@@ -14,6 +14,25 @@ class Cursor:
         self.x = x
         self.y = y
         
+class Glyph:
+    def __init__(self,neumes='',neumePos=[],lyrics='',lyricsPos=[],fthora='',fthoraPos=[]):
+        self.neumes = neumes
+        self.neumePos = neumePos
+        self.lyrics = lyrics
+        self.lyricsPos = lyricsPos
+        self.fthora = fthora
+        self.fthoraPos = fthoraPos
+         
+        self.nWidth = 0     # neume width
+        self.lWidth = 0     # lyric width
+        self.width  = 0     # glyph width
+         
+    def calc_width(self,neumeFont="EZPsaltica",neumeFontSize=20,
+                    lyricFont="EZOmega",lyricFontSize=12)
+        self.nWidth = pdfmetrics.stringWidth(self.neumes,neumeFont,neumeFontSize)
+        self.lWidth = pdfmetrics.stringWidth(self.lyrics,lyricFont,lyricFontSize)
+        self.width = max(self.nWidth,self.lWidth)
+        
 class Kassia:
     """Base class for package"""
     def __init__(self,fileName,outFile = "out.pdf"):
@@ -84,6 +103,33 @@ class Kassia:
             c.save()
         except IOError:
             print "Could not save file"
+            
+    def addable_neume(neume):
+        # See if neume should be added
+        # I think neumes that don't take lyrics should cover most cases
+        return(not neume_dict.takes_lyric(neume))
+            
+    def makeGlyphArray(self,neumes,lyrics = None):
+        neumeArray = neumes.split( )
+        lyricArray = re.split(' ',lyrics)
+        
+        i = 0
+        while(i < len(neumeArray)):
+            # Grab next neume
+            n = neumeArray[i]
+            
+            # Add more neumes to glyph? Like fthora, ison, etc
+            j = 1
+            while(addable_neume(neumeArray[i+j])):
+                j += 1
+            i += j
+        # Does neume call for lyric?
+            # Add in lyric
+            # If lyric ends with _
+                # See how many neumes to put in glyph
+        # Create glyph
+        # Calculate width
+        # Add glyph to list
             
             
     def linebreak(self,neumes,lyrics = None):
