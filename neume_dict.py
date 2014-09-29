@@ -4,6 +4,7 @@ import re
 def translate(text):
     splitText = text.split(" ")
     tmpText = [ezPsaltica[t] if ezPsaltica.has_key(t) else t for t in splitText]
+    # might need to add in a str replace for two vareia in a row
     return u' '.join(tmpText)
      
 def takesLyric(neume):
@@ -11,6 +12,35 @@ def takesLyric(neume):
         return True
     else:
         return False
+        
+def standAlone(neume):
+    if neume in standAloneNeumes:
+        return True
+    else:
+        return False
+
+def chunkNeumes(neumeText):
+    """Breaks neumeArray into logical chunks based on whether a linebreak
+    can occur between them"""
+    neumeArray = neumeText.split(' ')
+    chunkArray = []   
+    i = 0
+    while(i < len(neumeArray)):
+        # Grab next neume
+        chunk = neumeArray[i]
+        
+        # Add more neumes to chunk like fthora, ison, etc
+        j = 1
+        while(not standAlone(neumeArray[i+j])):
+            chunk += " " + neumeArray[i+j]
+            j += 1
+        i += j
+        # Check if we're at the end of the array
+        if (i+1) >= len(neumeArray):
+            break
+        
+        chunkArray.append(chunk)
+    return chunkArray
      
 ezPsaltica = {
     #' ' : u'\uF020',
@@ -114,3 +144,7 @@ ezPsaltica = {
 neumesWithLyrics = ['0','p','1','2','3','4','5','6','7','8','9','`','=','q','w','e','r',
               't','y','u','i','!','@','_',')','-','#','#','%','^','&','*','(','Q',
               'W','E','O','o','l','L','P','I','U','Y','T','R']
+              
+standAloneNeumes = ['0','p','1','2','3','4','5','6','7','8','9','`','=','q','w','e','r',
+              't','y','u','i','!','@','_',')','-','#','#','%','^','&','*','(','Q',
+              'W','E','O','o','l','L','P','I','U','Y','T','R','|','c','v','b','n','m',',','.']

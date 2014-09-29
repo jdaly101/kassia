@@ -28,7 +28,7 @@ class Glyph:
         self.width  = 0     # glyph width
          
     def calc_width(self,neumeFont="EZPsaltica",neumeFontSize=20,
-                    lyricFont="EZOmega",lyricFontSize=12)
+            lyricFont="EZOmega",lyricFontSize=12):
         self.nWidth = pdfmetrics.stringWidth(self.neumes,neumeFont,neumeFontSize)
         self.lWidth = pdfmetrics.stringWidth(self.lyrics,lyricFont,lyricFontSize)
         self.width = max(self.nWidth,self.lWidth)
@@ -88,15 +88,21 @@ class Kassia:
             neumesText = " ".join(troparion.find('neumes').text.strip().split())
             lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
             nPos,lPos = self.linebreak(neumesText,lyricsText)
+            #glyphArray = self.makeGlyphArray(neumesText,lyricsText)
             
             for glyph in nPos:
                 c.setFont("EZPsaltica",self.nFontSize)
                 c.drawString(glyph[0]+self.leftmargin,glyph[1] + 600,glyph[2])
-                print glyph
+                #print glyph
             for lyric in lPos:
                 c.setFont("EZOmega",self.lFontSize)
                 c.drawString(lyric[0]+self.leftmargin,lyric[1] + 600,lyric[2])
-                print lyric
+                #print lyric
+
+            neumeChunks = neume_dict.chunkNeumes(neumesText)
+            gArray = self.makeGlyphArray(neumeChunks,lyricsText)
+            for ga in gArray:
+                print ga.neumes + "  ::  " + ga.lyrics + "  ::  " + str(ga.width)
             
         c.showPage()
         try:
@@ -104,32 +110,49 @@ class Kassia:
         except IOError:
             print "Could not save file"
             
-    def addable_neume(neume):
-        # See if neume should be added
-        # I think neumes that don't take lyrics should cover most cases
-        return(not neume_dict.takes_lyric(neume))
             
-    def makeGlyphArray(self,neumes,lyrics = None):
-        neumeArray = neumes.split( )
+    def makeGlyphArray(self,neumeChunks,lyrics = None):
         lyricArray = re.split(' ',lyrics)
-        
-        i = 0
-        while(i < len(neumeArray)):
-            # Grab next neume
-            n = neumeArray[i]
+        i, lPtr = 0, 0
+        gArray = []
+        while(i < len(neumeChunks)):
+            # Grab next chunk
+            nc = neumeChunks[i]
+            if (neume_dict.takesLyric(nc[0])):
+                # chunk needs a lyric
+                lyr = lyricArray[lPtr]
+                lPtr += 1
+                g = Glyph(neumes=nc,lyrics=lyr)
+                g.calc_width()
+                # If lyrics ends in _ see if we should append a chunk
+                if (lyr[-1] == "_" and g.lWidth > g.nWidth):
+                    nextChunk = neumeChunks[i+1]
+                    if (neume_dict.takesLyric(nextChunk)):
+                        i += 1
+                        g.neumes += " " + neumeChunks[i]
+                        g.calc_width()
+            else: 
+                # no lyric needed
+                g = Glyph(nc)
+                g.calc_width()
             
-            # Add more neumes to glyph? Like fthora, ison, etc
-            j = 1
-            while(addable_neume(neumeArray[i+j])):
-                j += 1
-            i += j
-        # Does neume call for lyric?
+            gArray.append(g)
+            i += 1
+        return gArray
+
+            # Does chunk call for lyric?
+
             # Add in lyric
             # If lyric ends with _
                 # See how many neumes to put in glyph
         # Create glyph
         # Calculate width
-        # Add glyph to list
+        # Add glyph to list            
+            #print n
+            #g = Glyph(neumes = n)
+            #gArray.append(g)
+        
+
             
             
     def linebreak(self,neumes,lyrics = None):
@@ -140,7 +163,7 @@ class Kassia:
         #   then see if lyric is wider than span
         #   else see if width of glypch is max of neume and lyric
         charSpace = 4 # default space between characters
-        textOffset = 30 # default space lyrics appear below neumes
+        textOffset = 20 # default space lyrics appear below neumes
         #neumeArray = neume_dict.translate(neumes).split(' ')
         neumeArray = neumes.split(' ')
         neumePos = []
