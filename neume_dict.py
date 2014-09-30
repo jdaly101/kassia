@@ -31,7 +31,7 @@ def chunkNeumes(neumeText):
         
         # Add more neumes to chunk like fthora, ison, etc
         j = 1
-        while(not standAlone(neumeArray[i+j])):
+        while((not standAlone(neumeArray[i+j])) and (neumeArray[i+j] != "\\")):
             chunk += " " + neumeArray[i+j]
             j += 1
         i += j
@@ -146,5 +146,5 @@ neumesWithLyrics = ['0','p','1','2','3','4','5','6','7','8','9','`','=','q','w',
               'W','E','O','o','l','L','P','I','U','Y','T','R']
               
 standAloneNeumes = ['0','p','1','2','3','4','5','6','7','8','9','`','=','q','w','e','r',
-              't','y','u','i','!','@','_',')','-','#','#','%','^','&','*','(','Q',
+              't','y','u','i','!','@','_',')','-','#','#','%','^','&','*','(','Q','\\'
               'W','E','O','o','l','L','P','I','U','Y','T','R','|','c','v','b','n','m',',','.']

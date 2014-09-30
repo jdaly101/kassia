@@ -87,22 +87,27 @@ class Kassia:
         for troparion in self.bnml.iter('troparion'):
             neumesText = " ".join(troparion.find('neumes').text.strip().split())
             lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
-            nPos,lPos = self.linebreak(neumesText,lyricsText)
+            #nPos,lPos = self.linebreak(neumesText,lyricsText)
             #glyphArray = self.makeGlyphArray(neumesText,lyricsText)
             
-            for glyph in nPos:
-                c.setFont("EZPsaltica",self.nFontSize)
-                c.drawString(glyph[0]+self.leftmargin,glyph[1] + 600,glyph[2])
+            #for glyph in nPos:
+            #    c.setFont("EZPsaltica",self.nFontSize)
+            #    c.drawString(glyph[0]+self.leftmargin,glyph[1] + 600,glyph[2])
                 #print glyph
-            for lyric in lPos:
-                c.setFont("EZOmega",self.lFontSize)
-                c.drawString(lyric[0]+self.leftmargin,lyric[1] + 600,lyric[2])
+            #for lyric in lPos:
+            #    c.setFont("EZOmega",self.lFontSize)
+            #    c.drawString(lyric[0]+self.leftmargin,lyric[1] + 600,lyric[2])
                 #print lyric
+
+            self.neumeFont = "EZPsaltica"
+            self.neumeFontSize = 20
+            self.lyricFont = "EZOmega"
+            self.lyricFontSize = 12
 
             neumeChunks = neume_dict.chunkNeumes(neumesText)
             gArray = self.makeGlyphArray(neumeChunks,lyricsText)
-            for ga in gArray:
-                print ga.neumes + "  ::  " + ga.lyrics + "  ::  " + str(ga.width)
+            #for ga in gArray:
+            #    print ga.neumes + "  ::  " + ga.lyrics + "  ::  " + str(ga.width)
             
         c.showPage()
         try:
@@ -123,18 +128,20 @@ class Kassia:
                 lyr = lyricArray[lPtr]
                 lPtr += 1
                 g = Glyph(neumes=nc,lyrics=lyr)
-                g.calc_width()
+                #g.calc_width()
                 # If lyrics ends in _ see if we should append a chunk
-                if (lyr[-1] == "_" and g.lWidth > g.nWidth):
-                    nextChunk = neumeChunks[i+1]
-                    if (neume_dict.takesLyric(nextChunk)):
-                        i += 1
-                        g.neumes += " " + neumeChunks[i]
-                        g.calc_width()
+                ### This needs to be fixed: _ in lyrics can throw it off
+                ### Will also throw off the inter-glyph spacing...
+                #if (lyr[-1] == "_" and g.lWidth > g.nWidth):
+                #    nextChunk = neumeChunks[i+1]
+                #    if (neume_dict.takesLyric(nextChunk)):
+                #        i += 1
+                #        g.neumes += " " + neumeChunks[i]
+                #        g.calc_width()
             else: 
                 # no lyric needed
                 g = Glyph(nc)
-                g.calc_width()
+            g.calc_width()
             
             gArray.append(g)
             i += 1
@@ -152,6 +159,9 @@ class Kassia:
             #g = Glyph(neumes = n)
             #gArray.append(g)
         
+    def line_break2(self,glyphArray):
+        """Break neumes and lyrics into lines"""
+        cr = Cursor(0,0)
 
             
             
