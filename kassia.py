@@ -22,10 +22,12 @@ class Glyph:
         self.lyricsPos = lyricsPos
         self.fthora = fthora
         self.fthoraPos = fthoraPos
-         
+        
         self.nWidth = 0     # neume width
         self.lWidth = 0     # lyric width
         self.width  = 0     # glyph width
+
+        self.lineNum = 0    # line number, to be determined by linebreaking algorithm
          
     def calc_width(self,neumeFont="EZPsaltica",neumeFontSize=20,
             lyricFont="EZOmega",lyricFontSize=12):
@@ -81,33 +83,41 @@ class Kassia:
         pdfmetrics.registerFont(TTFont("EZOmega",omegaTTF))
         
         c = canvas.Canvas(self.outFile,pagesize = letter)
-        
+        vSpace = self.paperSize[1] - self.topmargin               
         
         # For each tropar
         for troparion in self.bnml.iter('troparion'):
             neumesText = " ".join(troparion.find('neumes').text.strip().split())
             lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
-            #nPos,lPos = self.linebreak(neumesText,lyricsText)
-            #glyphArray = self.makeGlyphArray(neumesText,lyricsText)
-            
-            #for glyph in nPos:
-            #    c.setFont("EZPsaltica",self.nFontSize)
-            #    c.drawString(glyph[0]+self.leftmargin,glyph[1] + 600,glyph[2])
-                #print glyph
-            #for lyric in lPos:
-            #    c.setFont("EZOmega",self.lFontSize)
-            #    c.drawString(lyric[0]+self.leftmargin,lyric[1] + 600,lyric[2])
-                #print lyric
 
             self.neumeFont = "EZPsaltica"
             self.neumeFontSize = 20
             self.lyricFont = "EZOmega"
             self.lyricFontSize = 12
 
+            firstLineOffset = 0     # Offset from dropcap char
+            lineSpacing = 72
+
             neumeChunks = neume_dict.chunkNeumes(neumesText)
             gArray = self.makeGlyphArray(neumeChunks,lyricsText)
-            #for ga in gArray:
-            #    print ga.neumes + "  ::  " + ga.lyrics + "  ::  " + str(ga.width)
+            gArray = self.line_break2(gArray,firstLineOffset)
+            
+            for ga in gArray:
+                c.setFont(self.neumeFont,self.nFontSize)
+                xpos = self.leftmargin + ga.neumePos
+                ypos = vSpace - (ga.lineNum + 1)*lineSpacing
+                c.drawString(xpos,ypos, ga.neumes)
+
+                lyricOffset = 10
+
+                if (ga.lyrics):
+                    ypos -= lyricOffset
+                    xpos = self.leftmargin + ga.lyricPos
+                    c.setFont(self.lyricFont,self.lFontSize)
+                    if (ga.lyrics[-1] == "_"):
+                        ga.lyrics += "_"
+                    c.drawString(xpos,ypos,ga.lyrics)
+
             
         c.showPage()
         try:
@@ -127,7 +137,7 @@ class Kassia:
                 # chunk needs a lyric
                 lyr = lyricArray[lPtr]
                 lPtr += 1
-                g = Glyph(neumes=nc,lyrics=lyr)
+                g = Glyph(neumes=neume_dict.translate(nc),lyrics=lyr)
                 #g.calc_width()
                 # If lyrics ends in _ see if we should append a chunk
                 ### This needs to be fixed: _ in lyrics can throw it off
@@ -140,7 +150,7 @@ class Kassia:
                 #        g.calc_width()
             else: 
                 # no lyric needed
-                g = Glyph(nc)
+                g = Glyph(neume_dict.translate(nc))
             g.calc_width()
             
             gArray.append(g)
@@ -152,18 +162,37 @@ class Kassia:
             # Add in lyric
             # If lyric ends with _
                 # See how many neumes to put in glyph
-        # Create glyph
-        # Calculate width
-        # Add glyph to list            
-            #print n
-            #g = Glyph(neumes = n)
-            #gArray.append(g)
         
-    def line_break2(self,glyphArray):
-        """Break neumes and lyrics into lines"""
-        cr = Cursor(0,0)
+    def line_break2(self,glyphArray,firstLineOffset):
+        """Break neumes and lyrics into lines, currently greedy"""
+        cr = Cursor(firstLineOffset,0)
 
-            
+        # should be able to override these params in xml
+        charSpace = 2 # avg spacing between characters
+        lineWidth = self.lineWidth
+
+        nlines = 0
+
+        for g in glyphArray:
+            if (cr.x + g.width) >= lineWidth:
+                cr.x = 0
+                nlines += 1
+            g.lineNum = nlines
+            adjLyricPos, adjNeumePos = 0, 0
+            if g.nWidth >= g.lWidth:
+                # center text
+                adjLyricPos = (g.width - g.lWidth) / 2.
+                
+            else:
+                # center neume
+                adjNeumePos = (g.width - g.nWidth) / 2.
+
+            g.neumePos = cr.x + adjNeumePos
+            g.lyricPos = cr.x + adjLyricPos
+            cr.x += g.width + charSpace
+
+        return glyphArray
+
             
     def linebreak(self,neumes,lyrics = None):
         """Break neumes and lyrics into lines"""

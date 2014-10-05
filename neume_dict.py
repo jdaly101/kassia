@@ -5,7 +5,7 @@ def translate(text):
     splitText = text.split(" ")
     tmpText = [ezPsaltica[t] if ezPsaltica.has_key(t) else t for t in splitText]
     # might need to add in a str replace for two vareia in a row
-    return u' '.join(tmpText)
+    return u''.join(tmpText)
      
 def takesLyric(neume):
     if neume in neumesWithLyrics:
