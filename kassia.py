@@ -4,6 +4,7 @@ from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.pagesizes import letter
+import reportlab.lib.colors as colors
 
 import sys
 import xml.etree.ElementTree as ET
@@ -15,7 +16,8 @@ class Cursor:
         self.y = y
         
 class Glyph:
-    def __init__(self,neumes='',neumePos=[],lyrics='',lyricsPos=[],fthora='',fthoraPos=[]):
+    def __init__(self,neumes='',neumePos=[],lyrics='',
+                 lyricsPos=[],fthora='',fthoraPos=[]):
         self.neumes = neumes
         self.neumePos = neumePos
         self.lyrics = lyrics
@@ -30,7 +32,7 @@ class Glyph:
         self.lineNum = 0    # line number, to be determined by linebreaking algorithm
          
     def calc_width(self,neumeFont="EZPsaltica",neumeFontSize=20,
-            lyricFont="EZOmega",lyricFontSize=12):
+                   lyricFont="EZOmega",lyricFontSize=12):
         self.nWidth = pdfmetrics.stringWidth(self.neumes,neumeFont,neumeFontSize)
         self.lWidth = pdfmetrics.stringWidth(self.lyrics,lyricFont,lyricFontSize)
         self.width = max(self.nWidth,self.lWidth)
@@ -83,10 +85,24 @@ class Kassia:
         pdfmetrics.registerFont(TTFont("EZOmega",omegaTTF))
         
         c = canvas.Canvas(self.outFile,pagesize = letter)
-        vSpace = self.paperSize[1] - self.topmargin               
+        vSpace = self.paperSize[1] - self.topmargin  
+        vert_pos = self.paperSize[1] - self.topmargin             
         
         # For each tropar
         for troparion in self.bnml.iter('troparion'):
+            title_elem = troparion.find('title')
+            title_text = title_elem.text.strip()
+            title_attrib = title_elem.attrib
+            title_attrib = self.fill_title_dict(title_attrib)
+
+            c.setFillColor(title_attrib['color'])
+            
+            vert_pos -= title_attrib['font_size'] + 10
+            c.setFont('EZOmega',title_attrib['font_size'])
+            c.drawCentredString(self.paperSize[0]/2,vert_pos,title_text)
+            vert_pos -= 36
+            c.setFillColor(colors.black)
+
             neumesText = " ".join(troparion.find('neumes').text.strip().split())
             lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
 
@@ -105,7 +121,7 @@ class Kassia:
             for ga in gArray:
                 c.setFont(self.neumeFont,self.nFontSize)
                 xpos = self.leftmargin + ga.neumePos
-                ypos = vSpace - (ga.lineNum + 1)*lineSpacing
+                ypos = vert_pos - (ga.lineNum + 1)*lineSpacing
                 c.drawString(xpos,ypos, ga.neumes)
 
                 lyricOffset = 10
@@ -250,6 +266,19 @@ class Kassia:
             
         #print neumePos
         return neumePos, lyricPos
+
+    def fill_title_dict(self, title_dict):
+        if not title_dict.has_key('color'):
+            title_dict['color'] = colors.Color(0,0,1,1)
+        else:
+            """parse the color"""
+            if title_dict['color'] == "blue":
+                title_dict['color'] = colors.blue
+        if not title_dict.has_key('font_size'):
+            title_dict['font_size'] = 14
+
+        return title_dict
+
         
 
 def main(argv):

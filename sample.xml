@@ -1,27 +1,27 @@
 <bnml>
 
-<troparion>
-    <title>
-        Lord I have cried
-    </title>
-    <tone>
-        1
-    </tone>
-    <rightannotation type="chronos" symbol="argon">
-        84
-    </rightannotation>
-    <rightannotation>
-        Kyrie ekekraxa
-    </rightannotation>
-    <neumes>
-        O S ! ! 1 1 ' ! ! ; " ! s \ 0 ! s 1 w ! 
-        A | v V J 3 z U U S ! _ 1 " s ! 0 a v V 1 ~ 0
-    </neumes>
-    <lyrics>
-        Lord,_ _ I have cried_ _ un- - to_ _ _ Thee,_ _ heark- en un- - to_ _ _ me; 
-        hear- ken_ un-to_ me,_ O_ Lord.
-    </lyrics>
-</troparion>
+    <troparion>
+        <title color="blue">
+            Lord, I Have Cried
+        </title>
+        <tone>
+            1
+        </tone>
+        <rightannotation type="chronos" symbol="argon">
+            84
+        </rightannotation>
+        <rightannotation>
+            Kyrie ekekraxa
+        </rightannotation>
+        <neumes>
+            O S ! ! 1 1 ' ! ! ; " ! s \ 0 ! s 1 w ! 
+            A | v V J 3 z U U S ! _ 1 " s ! 0 a v V 1 ~ 0
+        </neumes>
+        <lyrics>
+            Lord,_ _ I have cried_ _ un- - to_ _ _ Thee,_ _ heark- en un- - to_ _ _ me; 
+            hear- ken_ un-to_ me,_ O_ Lord.
+        </lyrics>
+    </troparion>
 
 </bnml>
 
