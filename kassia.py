@@ -90,17 +90,19 @@ class Kassia:
         
         # For each tropar
         for troparion in self.bnml.iter('troparion'):
+            # Draw title if there is one
             title_elem = troparion.find('title')
-            title_text = title_elem.text.strip()
-            title_attrib = title_elem.attrib
-            title_attrib = self.fill_title_dict(title_attrib)
+            if (title_elem is not None):
+                title_text = title_elem.text.strip()
+                title_attrib = title_elem.attrib
+                title_attrib = self.fill_title_dict(title_attrib)
 
-            c.setFillColor(title_attrib['color'])
-            
-            vert_pos -= title_attrib['font_size'] + 10
-            c.setFont('EZOmega',title_attrib['font_size'])
-            c.drawCentredString(self.paperSize[0]/2,vert_pos,title_text)
-            vert_pos -= 36
+                c.setFillColor(title_attrib['color'])
+                
+                vert_pos -= title_attrib['font_size'] + 10
+                c.setFont('EZOmega',title_attrib['font_size'])
+                c.drawCentredString(self.paperSize[0]/2,vert_pos,title_text)
+                vert_pos -= 36
             c.setFillColor(colors.black)
 
             neumesText = " ".join(troparion.find('neumes').text.strip().split())
@@ -119,6 +121,7 @@ class Kassia:
             gArray = self.line_break2(gArray,firstLineOffset)
             
             for ga in gArray:
+                # TO DO: check if cursor has reached the end of the page
                 c.setFont(self.neumeFont,self.nFontSize)
                 xpos = self.leftmargin + ga.neumePos
                 ypos = vert_pos - (ga.lineNum + 1)*lineSpacing
@@ -269,17 +272,29 @@ class Kassia:
 
     def fill_title_dict(self, title_dict):
         if not title_dict.has_key('color'):
-            title_dict['color'] = colors.Color(0,0,1,1)
+           tmp_col = colors.Color(0,0,1,1)
         else:
             """parse the color"""
             if title_dict['color'] == "blue":
                 title_dict['color'] = colors.blue
+            elif re.match("#[0-9a-fA-F]{6}",title_dict['color']):
+                col = [z/255. for z in hex_to_rgb(title_dict['color'])]
+                title_dict['color'] = colors.Color(col[0],col[1],col[2],1)
+            else:
+                title_dict['color'] = color.black
+        
         if not title_dict.has_key('font_size'):
             title_dict['font_size'] = 14
+        
+        if not title_dict.has_key('font'):
+            title_dict['font'] = "EZOmega"
 
         return title_dict
 
-        
+def hex_to_rgb(x):
+    x = x.lstrip('#')
+    lv = len(x)
+    return tuple(int(x[i:i+lv // 3], 16) for i in range(0,lv,lv // 3))
 
 def main(argv):
     if len(argv) == 1:
