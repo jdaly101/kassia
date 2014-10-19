@@ -40,7 +40,6 @@ class Glyph:
 class Kassia:
     """Base class for package"""
     def __init__(self,fileName,outFile = "out.pdf"):
-        print "Making a Kassia..."
         self.fileName = fileName # input file
         self.outFile = outFile # output file
         try:
@@ -55,7 +54,6 @@ class Kassia:
             self.createPDF()
         
     def parseFile(self):
-        print "Will it parse?"
         try:
             bnmlTree = ET.parse(self.fileName)
             bnml = bnmlTree.getroot()
@@ -133,8 +131,8 @@ class Kassia:
                     ypos -= lyricOffset
                     xpos = self.leftmargin + ga.lyricPos
                     c.setFont(self.lyricFont,self.lFontSize)
-                    if (ga.lyrics[-1] == "_"):
-                        ga.lyrics += "_"
+                    #if (ga.lyrics[-1] == "_"):
+                    #    ga.lyrics += "_"
                     c.drawString(xpos,ypos,ga.lyrics)
 
             
@@ -154,7 +152,10 @@ class Kassia:
             nc = neumeChunks[i]
             if (neume_dict.takesLyric(nc[0])):
                 # chunk needs a lyric
-                lyr = lyricArray[lPtr]
+                if (lPtr < len(lyricArray)):
+                    lyr = lyricArray[lPtr]
+                else:
+                    lyr = ' '
                 lPtr += 1
                 g = Glyph(neumes=neume_dict.translate(nc),lyrics=lyr)
                 #g.calc_width()
