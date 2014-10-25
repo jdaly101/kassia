@@ -30,16 +30,17 @@ def chunkNeumes(neumeText):
         chunk = neumeArray[i]
         # Add more neumes to chunk like fthora, ison, etc
         j = 1
-        while((not standAlone(neumeArray[i+j])) and (neumeArray[i+j] != "\\")):
-            chunk += " " + neumeArray[i+j]
-            j += 1
-            if (i+j >= len(neumeArray)):
-                print "At the end!"
-                break
+        if (i+1) < len(neumeArray):
+            while((not standAlone(neumeArray[i+j])) and (neumeArray[i+j] != "\\")):
+                chunk += " " + neumeArray[i+j]
+                j += 1
+                if (i+j >= len(neumeArray)):
+                    print "At the end!"
+                    break
         i += j
         chunkArray.append(chunk)
         # Check if we're at the end of the array
-        if (i+1) >= len(neumeArray):
+        if i >= len(neumeArray):
             break
         
         

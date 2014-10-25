@@ -1,4 +1,5 @@
 import neume_dict
+from glyphs import Glyph, GlyphLine
 
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
@@ -14,28 +15,6 @@ class Cursor:
     def __init__(self,x=0,y=0):
         self.x = x
         self.y = y
-        
-class Glyph:
-    def __init__(self,neumes='',neumePos=[],lyrics='',
-                 lyricsPos=[],fthora='',fthoraPos=[]):
-        self.neumes = neumes
-        self.neumePos = neumePos
-        self.lyrics = lyrics
-        self.lyricsPos = lyricsPos
-        self.fthora = fthora
-        self.fthoraPos = fthoraPos
-        
-        self.nWidth = 0     # neume width
-        self.lWidth = 0     # lyric width
-        self.width  = 0     # glyph width
-
-        self.lineNum = 0    # line number, to be determined by linebreaking algorithm
-         
-    def calc_width(self,neumeFont="EZPsaltica",neumeFontSize=20,
-                   lyricFont="EZOmega",lyricFontSize=12):
-        self.nWidth = pdfmetrics.stringWidth(self.neumes,neumeFont,neumeFontSize)
-        self.lWidth = pdfmetrics.stringWidth(self.lyrics,lyricFont,lyricFontSize)
-        self.width = max(self.nWidth,self.lWidth)
         
 class Kassia:
     """Base class for package"""
@@ -135,6 +114,8 @@ class Kassia:
                     #    ga.lyrics += "_"
                     c.drawString(xpos,ypos,ga.lyrics)
 
+
+
             
         c.showPage()
         try:
@@ -158,16 +139,8 @@ class Kassia:
                     lyr = ' '
                 lPtr += 1
                 g = Glyph(neumes=neume_dict.translate(nc),lyrics=lyr)
-                #g.calc_width()
-                # If lyrics ends in _ see if we should append a chunk
-                ### This needs to be fixed: _ in lyrics can throw it off
-                ### Will also throw off the inter-glyph spacing...
-                #if (lyr[-1] == "_" and g.lWidth > g.nWidth):
-                #    nextChunk = neumeChunks[i+1]
-                #    if (neume_dict.takesLyric(nextChunk)):
-                #        i += 1
-                #        g.neumes += " " + neumeChunks[i]
-                #        g.calc_width()
+                # To Do: see if lyric ends with '_' and if lyrics are
+                # wider than the neume, then combine with next chunk
             else: 
                 # no lyric needed
                 g = Glyph(neume_dict.translate(nc))
@@ -177,14 +150,10 @@ class Kassia:
             i += 1
         return gArray
 
-            # Does chunk call for lyric?
-
-            # Add in lyric
-            # If lyric ends with _
-                # See how many neumes to put in glyph
         
     def line_break2(self,glyphArray,firstLineOffset):
-        """Break neumes and lyrics into lines, currently greedy"""
+        """Break neumes and lyrics into lines, currently greedy
+        Rework this to return a list of lines!!!!"""
         cr = Cursor(firstLineOffset,0)
 
         # should be able to override these params in xml
@@ -192,7 +161,6 @@ class Kassia:
         lineWidth = self.lineWidth
 
         nlines = 0
-
         for g in glyphArray:
             if (cr.x + g.width) >= lineWidth:
                 cr.x = 0
@@ -286,6 +254,8 @@ class Kassia:
         
         if not title_dict.has_key('font_size'):
             title_dict['font_size'] = 14
+        else:
+            title_dict['font_size'] = int(title_dict['font_size'])
         
         if not title_dict.has_key('font'):
             title_dict['font'] = "EZOmega"
