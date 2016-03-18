@@ -1,0 +1,14 @@
+{
+  "name": "kassia-editor",
+  "version": "0.0.1",
+  "description": "Web interface to create input files for Kassia",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jdaly",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
+}
