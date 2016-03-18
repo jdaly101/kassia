@@ -1,2 +1,4 @@
 *.pdf
 editor/node_modules
+editor/.tmp
+
