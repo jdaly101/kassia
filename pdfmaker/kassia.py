@@ -51,8 +51,6 @@ class Kassia:
         self.rightmargin = 72
         self.lineHeight = 72
         self.lineWidth = self.paperSize[0] - (self.leftmargin + self.rightmargin)
-        self.nFontSize = 20
-        self.lFontSize = 12
         
         psalticaTTF = "fonts/EZ Psaltica.TTF"
         oxeiaTTF    = "fonts/EZ Oxeia.ttf"
@@ -77,18 +75,24 @@ class Kassia:
                 c.setFillColor(title_attrib['color'])
                 
                 vert_pos -= title_attrib['font_size'] + 10
-                c.setFont('EZOmega',title_attrib['font_size'])
+                c.setFont(title_attrib['font'],title_attrib['font_size'])
                 c.drawCentredString(self.paperSize[0]/2,vert_pos,title_text)
                 vert_pos -= 36
             c.setFillColor(colors.black)
 
-            neumesText = " ".join(troparion.find('neumes').text.strip().split())
-            lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
+            # Get attributes for neumes
+            neume_elem = troparion.find('neumes')
+            if (neume_elem is not None):
+                neumesText = " ".join(neume_elem.text.strip().split())
+                neume_attrib = neume_elem.attrib
+                neume_attrib = self.fill_title_dict(neume_attrib)
 
-            self.neumeFont = "EZPsaltica"
-            self.neumeFontSize = 20
-            self.lyricFont = "EZOmega"
-            self.lyricFontSize = 12
+            # Get attributes for lyrics
+            lyric_elem = troparion.find('lyrics')
+            if (lyric_elem is not None):
+                lyricsText = " ".join(lyric_elem.text.strip().split())
+                lyric_attrib = lyric_elem.attrib
+                lyric_attrib = self.fill_title_dict(lyric_attrib)
 
             firstLineOffset = 0     # Offset from dropcap char
             lineSpacing = 72
@@ -99,7 +103,7 @@ class Kassia:
             
             for ga in gArray:
                 # TO DO: check if cursor has reached the end of the page
-                c.setFont(self.neumeFont,self.nFontSize)
+                c.setFont(neume_attrib['font'],neume_attrib['font_size'])
                 xpos = self.leftmargin + ga.neumePos
                 ypos = vert_pos - (ga.lineNum + 1)*lineSpacing
                 c.drawString(xpos,ypos, ga.neumes)
@@ -109,7 +113,7 @@ class Kassia:
                 if (ga.lyrics):
                     ypos -= lyricOffset
                     xpos = self.leftmargin + ga.lyricPos
-                    c.setFont(self.lyricFont,self.lFontSize)
+                    c.setFont(lyric_attrib['font'],lyric_attrib['font_size'])
                     #if (ga.lyrics[-1] == "_"):
                     #    ga.lyrics += "_"
                     c.drawString(xpos,ypos,ga.lyrics)
@@ -205,7 +209,7 @@ class Kassia:
                     lyr = lyricArray[lyricIdx]
                 else:
                     lyr = ""
-                lWidth = pdfmetrics.stringWidth(lyr,'EZOmega',self.lFontSize)
+                lWidth = pdfmetrics.stringWidth(lyr,lyric_attrib['font'],lyric_attrib['font_size'])
                 # Glyph width will be the max of the two if lyric isn't stretched out
                 # across multiple neumes
                 addLyric = False
