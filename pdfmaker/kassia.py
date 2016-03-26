@@ -43,15 +43,19 @@ class Kassia:
             
     def createPDF(self):
         """Create PDF output file"""
-        # TODO: Parse page layout and formatting
+        # Parse page layout and formatting
+        if (self.bnml is not None):
+            margin_attrib = self.bnml.attrib
+            margin_attrib = self.fill_page_dict(margin_attrib)
+
         self.paperSize = letter
-        self.topmargin = 72
-        self.bottommargin = 72
-        self.leftmargin = 72
-        self.rightmargin = 72
-        self.lineHeight = 72
-        self.lineWidth = self.paperSize[0] - (self.leftmargin + self.rightmargin)
-        
+        self.topMargin = margin_attrib['top_margin']
+        self.bottomMargin = margin_attrib['bottom_margin']
+        self.leftMargin = margin_attrib['left_margin']
+        self.rightMargin = margin_attrib['right_margin']
+        self.lineHeight = margin_attrib['line_height']
+        self.lineWidth = self.paperSize[0] - (self.leftMargin + self.rightMargin)
+
         psalticaTTF = "fonts/EZ Psaltica.TTF"
         oxeiaTTF    = "fonts/EZ Oxeia.ttf"
         omegaTTF    = "fonts/EZ Omega.ttf"
@@ -60,9 +64,9 @@ class Kassia:
         pdfmetrics.registerFont(TTFont("EZOmega",omegaTTF))
         
         c = canvas.Canvas(self.outFile,pagesize = letter)
-        vSpace = self.paperSize[1] - self.topmargin  
-        vert_pos = self.paperSize[1] - self.topmargin             
-        
+        vSpace = self.paperSize[1] - self.topMargin
+        vert_pos = self.paperSize[1] - self.topMargin
+
         # For each tropar
         for troparion in self.bnml.iter('troparion'):
             # Draw title if there is one
@@ -104,7 +108,7 @@ class Kassia:
             for ga in gArray:
                 # TO DO: check if cursor has reached the end of the page
                 c.setFont(neume_attrib['font'],neume_attrib['font_size'])
-                xpos = self.leftmargin + ga.neumePos
+                xpos = self.leftMargin + ga.neumePos
                 ypos = vert_pos - (ga.lineNum + 1)*lineSpacing
                 c.drawString(xpos,ypos, ga.neumes)
 
@@ -112,7 +116,7 @@ class Kassia:
 
                 if (ga.lyrics):
                     ypos -= lyricOffset
-                    xpos = self.leftmargin + ga.lyricPos
+                    xpos = self.leftMargin + ga.lyricPos
                     c.setFont(lyric_attrib['font'],lyric_attrib['font_size'])
                     #if (ga.lyrics[-1] == "_"):
                     #    ga.lyrics += "_"
@@ -242,6 +246,14 @@ class Kassia:
             
         #print neumePos
         return neumePos, lyricPos
+
+    def fill_page_dict(self, page_dict):
+        for attrib_name in page_dict:
+            if not page_dict.has_key(attrib_name):
+                page_dict[attrib_name] = 72
+            else:
+                page_dict[attrib_name] = int(page_dict[attrib_name])
+        return page_dict
 
     def fill_title_dict(self, title_dict):
         if not title_dict.has_key('color'):
