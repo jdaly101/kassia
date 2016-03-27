@@ -255,7 +255,7 @@ class Kassia:
 
     def fill_title_dict(self, title_dict):
         if not title_dict.has_key('color'):
-           tmp_col = colors.Color(0,0,1,1)
+           title_dict['color'] = colors.Color(0,0,1,1)
         else:
             """parse the color"""
             if title_dict['color'] == "blue":
