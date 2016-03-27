@@ -49,11 +49,11 @@ class Kassia:
             margin_attrib = self.fill_page_dict(margin_attrib)
 
         self.paperSize = letter
-        self.topMargin = margin_attrib['top_margin']
-        self.bottomMargin = margin_attrib['bottom_margin']
-        self.leftMargin = margin_attrib['left_margin']
-        self.rightMargin = margin_attrib['right_margin']
-        self.lineHeight = margin_attrib['line_height']
+        self.topMargin = margin_attrib.get('top_margin', 72)
+        self.bottomMargin = margin_attrib.get('bottom_margin', 72)
+        self.leftMargin = margin_attrib.get('left_margin', 72)
+        self.rightMargin = margin_attrib.get('right_margin', 72)
+        self.lineHeight = margin_attrib.get('line_height', 72)
         self.lineWidth = self.paperSize[0] - (self.leftMargin + self.rightMargin)
 
         psalticaTTF = "fonts/EZ Psaltica.TTF"
@@ -89,14 +89,14 @@ class Kassia:
             if (neume_elem is not None):
                 neumesText = " ".join(neume_elem.text.strip().split())
                 neume_attrib = neume_elem.attrib
-                neume_attrib = self.fill_title_dict(neume_attrib)
+                neume_attrib = self.fill_neume_dict(neume_attrib)
 
             # Get attributes for lyrics
             lyric_elem = troparion.find('lyrics')
             if (lyric_elem is not None):
                 lyricsText = " ".join(lyric_elem.text.strip().split())
                 lyric_attrib = lyric_elem.attrib
-                lyric_attrib = self.fill_title_dict(lyric_attrib)
+                lyric_attrib = self.fill_lyric_dict(lyric_attrib)
 
             firstLineOffset = 0     # Offset from dropcap char
             lineSpacing = 72
@@ -249,9 +249,7 @@ class Kassia:
 
     def fill_page_dict(self, page_dict):
         for attrib_name in page_dict:
-            if not page_dict.has_key(attrib_name):
-                page_dict[attrib_name] = 72
-            else:
+            if page_dict[attrib_name]:
                 page_dict[attrib_name] = int(page_dict[attrib_name])
         return page_dict
 
@@ -277,6 +275,28 @@ class Kassia:
             title_dict['font'] = "EZOmega"
 
         return title_dict
+
+    def fill_lyric_dict(self, lyric_dict):
+        if not lyric_dict.has_key('font_size'):
+            lyric_dict['font_size'] = 14
+        else:
+            lyric_dict['font_size'] = int(lyric_dict['font_size'])
+
+        if not lyric_dict.has_key('font'):
+            lyric_dict['font'] = "EZOmega"
+
+        return lyric_dict
+
+    def fill_neume_dict(self, neume_dict):
+        if not neume_dict.has_key('font_size'):
+            neume_dict['font_size'] = 20
+        else:
+            neume_dict['font_size'] = int(neume_dict['font_size'])
+
+        if not neume_dict.has_key('font'):
+            neume_dict['font'] = "EZPsaltica"
+
+        return neume_dict
 
 def hex_to_rgb(x):
     x = x.lstrip('#')
