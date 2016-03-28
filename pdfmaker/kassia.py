@@ -98,14 +98,16 @@ class Kassia:
                 neumesText = " ".join(neume_elem.text.strip().split())
                 neume_attrib = neume_elem.attrib
                 # Update the defaults with info from the xml
-                self.neumeFont.update(self.fill_neume_dict(neume_attrib))
+                temp_dict = self.fill_music_dict(neume_attrib)
+                self.neumeFont.update(temp_dict)
 
             # Get attributes for lyrics
             lyric_elem = troparion.find('lyrics')
             if (lyric_elem is not None):
                 lyricsText = " ".join(lyric_elem.text.strip().split())
                 lyric_attrib = lyric_elem.attrib
-                self.lyricFont.update(self.fill_lyric_dict(lyric_attrib))
+                temp_dict = self.fill_music_dict(lyric_attrib)
+                self.lyricFont.update(temp_dict)
 
             firstLineOffset = 0     # Offset from dropcap char
             lineSpacing = 72
@@ -285,21 +287,14 @@ class Kassia:
 
         return title_dict
 
-    def fill_lyric_dict(self, lyric_dict):
-        if not lyric_dict.has_key('font_size'):
-            lyric_dict['font_size'] = 14
-        else:
-            lyric_dict['font_size'] = int(lyric_dict['font_size'])
+    def fill_music_dict(self, music_dict):
+        try:
+            music_dict['font_size'] = int(music_dict['font_size'])
+        except ValueError as e:
+            print "Font size error: {}".format(e)
+            music_dict.pop('font_size')
 
-        return lyric_dict
-
-    def fill_neume_dict(self, neume_dict):
-        if not neume_dict.has_key('font_size'):
-            neume_dict['font_size'] = 20
-        else:
-            neume_dict['font_size'] = int(neume_dict['font_size'])
-
-        return neume_dict
+        return music_dict
 
 def hex_to_rgb(x):
     x = x.lstrip('#')
