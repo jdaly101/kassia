@@ -43,18 +43,16 @@ class Kassia:
             
     def createPDF(self):
         """Create PDF output file"""
-        # Parse page layout and formatting
-        if (self.bnml is not None):
-            margin_attrib = self.bnml.attrib
-            margin_attrib = self.fill_page_dict(margin_attrib)
 
-        self.paperSize = letter
-        self.topMargin = margin_attrib.get('top_margin', 72)
-        self.bottomMargin = margin_attrib.get('bottom_margin', 72)
-        self.leftMargin = margin_attrib.get('left_margin', 72)
-        self.rightMargin = margin_attrib.get('right_margin', 72)
-        self.lineHeight = margin_attrib.get('line_height', 72)
-        self.lineWidth = self.paperSize[0] - (self.leftMargin + self.rightMargin)
+        # Set page defaults
+        self.pageAttrib = {}
+        self.pageAttrib['paper_size'] = letter
+        self.pageAttrib['top_margin'] = 72
+        self.pageAttrib['bottom_margin'] = 72
+        self.pageAttrib['left_margin'] = 72
+        self.pageAttrib['right_margin'] = 72
+        self.pageAttrib['line_height'] = 72
+        self.pageAttrib['line_width'] = self.pageAttrib['paper_size'][0] - (self.pageAttrib['left_margin'] + self.pageAttrib['right_margin'])
 
         psalticaTTF = "fonts/EZ Psaltica.TTF"
         oxeiaTTF    = "fonts/EZ Oxeia.ttf"
@@ -79,9 +77,15 @@ class Kassia:
         self.lyricFont['font'] = 'EZOmega'
         self.lyricFont['font_size'] = 12
 
+        # Parse page layout and formatting
+        if (self.bnml is not None):
+            margin_attrib = self.bnml.attrib
+            temp_dict = self.fill_page_dict(margin_attrib)
+            self.pageAttrib.update(temp_dict)
+
         c = canvas.Canvas(self.outFile,pagesize = letter)
-        vSpace = self.paperSize[1] - self.topMargin
-        vert_pos = self.paperSize[1] - self.topMargin
+        vSpace = self.pageAttrib['paper_size'][1] - self.pageAttrib['top_margin']
+        vert_pos = self.pageAttrib['paper_size'][1] - self.pageAttrib['top_margin']
 
         # For each tropar
         for troparion in self.bnml.iter('troparion'):
@@ -96,7 +100,7 @@ class Kassia:
 
                 vert_pos -= self.titleAttrib['font_size'] + 10
                 c.setFont(self.titleAttrib['font'],self.titleAttrib['font_size'])
-                c.drawCentredString(self.paperSize[0]/2,vert_pos,title_text)
+                c.drawCentredString(self.pageAttrib['paper_size'][0]/2,vert_pos,title_text)
                 vert_pos -= 36
             c.setFillColor(colors.black)
 
@@ -127,7 +131,7 @@ class Kassia:
             for ga in gArray:
                 # TO DO: check if cursor has reached the end of the page
                 c.setFont(self.neumeFont['font'],self.neumeFont['font_size'])
-                xpos = self.leftMargin + ga.neumePos
+                xpos = self.pageAttrib['left_margin'] + ga.neumePos
                 ypos = vert_pos - (ga.lineNum + 1)*lineSpacing
                 c.drawString(xpos,ypos, ga.neumes)
 
@@ -135,7 +139,7 @@ class Kassia:
 
                 if (ga.lyrics):
                     ypos -= lyricOffset
-                    xpos = self.leftMargin + ga.lyricPos
+                    xpos = self.pageAttrib['left_margin'] + ga.lyricPos
                     c.setFont(self.lyricFont['font'],self.lyricFont['font_size'])
                     #if (ga.lyrics[-1] == "_"):
                     #    ga.lyrics += "_"
@@ -185,7 +189,7 @@ class Kassia:
 
         # should be able to override these params in xml
         charSpace = 2 # avg spacing between characters
-        lineWidth = self.lineWidth
+        lineWidth = self.pageAttrib['line_width']
 
         nlines = 0
         for g in glyphArray:
@@ -267,9 +271,9 @@ class Kassia:
         return neumePos, lyricPos
 
     def fill_page_dict(self, page_dict):
+        # TO DO: better error handling; value could be empty string
         for attrib_name in page_dict:
-            if page_dict[attrib_name]:
-                page_dict[attrib_name] = int(page_dict[attrib_name])
+            page_dict[attrib_name] = int(page_dict[attrib_name])
         return page_dict
 
     def fill_text_dict(self, title_dict):
