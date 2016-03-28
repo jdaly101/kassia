@@ -63,10 +63,18 @@ class Kassia:
         pdfmetrics.registerFont(TTFont("EZOxeia",oxeiaTTF))
         pdfmetrics.registerFont(TTFont("EZOmega",omegaTTF))
 
-        # Set more defaults, will overwrite with xml later
+        # Set title defaults
+        self.titleAttrib = {}
+        self.titleAttrib['font'] = 'EZOmega'
+        self.titleAttrib['font_size'] = 18
+        self.titleAttrib['color'] = colors.black
+
+        # Set neume defaults
         self.neumeFont = {}
         self.neumeFont['font'] = 'EZPsaltica'
         self.neumeFont['font_size'] = 20
+
+        # Set lyric defaults
         self.lyricFont = {}
         self.lyricFont['font'] = 'EZOmega'
         self.lyricFont['font_size'] = 12
@@ -82,12 +90,12 @@ class Kassia:
             if (title_elem is not None):
                 title_text = title_elem.text.strip()
                 title_attrib = title_elem.attrib
-                title_attrib = self.fill_title_dict(title_attrib)
+                self.titleAttrib.update(self.fill_text_dict(title_attrib))
 
-                c.setFillColor(title_attrib['color'])
-                
-                vert_pos -= title_attrib['font_size'] + 10
-                c.setFont(title_attrib['font'],title_attrib['font_size'])
+                c.setFillColor(self.titleAttrib['color'])
+
+                vert_pos -= self.titleAttrib['font_size'] + 10
+                c.setFont(self.titleAttrib['font'],self.titleAttrib['font_size'])
                 c.drawCentredString(self.paperSize[0]/2,vert_pos,title_text)
                 vert_pos -= 36
             c.setFillColor(colors.black)
@@ -98,7 +106,7 @@ class Kassia:
                 neumesText = " ".join(neume_elem.text.strip().split())
                 neume_attrib = neume_elem.attrib
                 # Update the defaults with info from the xml
-                temp_dict = self.fill_music_dict(neume_attrib)
+                temp_dict = self.fill_text_dict(neume_attrib)
                 self.neumeFont.update(temp_dict)
 
             # Get attributes for lyrics
@@ -106,7 +114,7 @@ class Kassia:
             if (lyric_elem is not None):
                 lyricsText = " ".join(lyric_elem.text.strip().split())
                 lyric_attrib = lyric_elem.attrib
-                temp_dict = self.fill_music_dict(lyric_attrib)
+                temp_dict = self.fill_text_dict(lyric_attrib)
                 self.lyricFont.update(temp_dict)
 
             firstLineOffset = 0     # Offset from dropcap char
@@ -264,37 +272,26 @@ class Kassia:
                 page_dict[attrib_name] = int(page_dict[attrib_name])
         return page_dict
 
-    def fill_title_dict(self, title_dict):
-        if not title_dict.has_key('color'):
-           title_dict['color'] = colors.Color(0,0,1,1)
-        else:
-            """parse the color"""
+    def fill_text_dict(self, title_dict):
+        """parse the color"""
+        if title_dict.has_key('color'):
             if title_dict['color'] == "blue":
                 title_dict['color'] = colors.blue
             elif re.match("#[0-9a-fA-F]{6}",title_dict['color']):
                 col = [z/255. for z in hex_to_rgb(title_dict['color'])]
                 title_dict['color'] = colors.Color(col[0],col[1],col[2],1)
             else:
-                title_dict['color'] = color.black
-        
-        if not title_dict.has_key('font_size'):
-            title_dict['font_size'] = 14
-        else:
-            title_dict['font_size'] = int(title_dict['font_size'])
-        
-        if not title_dict.has_key('font'):
-            title_dict['font'] = "EZOmega"
+                title_dict.pop('color')
 
-        return title_dict
-
-    def fill_music_dict(self, music_dict):
+        """parse the font size"""
         try:
-            music_dict['font_size'] = int(music_dict['font_size'])
+            title_dict['font_size'] = int(title_dict['font_size'])
         except ValueError as e:
             print "Font size error: {}".format(e)
-            music_dict.pop('font_size')
+            # Get rid of xml font size, will use default later
+            title_dict.pop('font_size')
 
-        return music_dict
+        return title_dict
 
 def hex_to_rgb(x):
     x = x.lstrip('#')
