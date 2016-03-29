@@ -29,21 +29,11 @@ class Kassia:
             print "Not readable"
         
         if fileReadable:
+            self.setDefaults()
             self.parseFile()
             self.createPDF()
-        
-    def parseFile(self):
-        try:
-            bnmlTree = ET.parse(self.fileName)
-            bnml = bnmlTree.getroot()
-            self.bnml = bnml   
-               
-        except ET.ParseError:
-            print "Failed to parse XML file"
-            
-    def createPDF(self):
-        """Create PDF output file"""
 
+    def setDefaults(self):
         # Set page defaults
         self.pageAttrib = {}
         self.pageAttrib['paper_size'] = letter
@@ -76,6 +66,18 @@ class Kassia:
         self.lyricFont = {}
         self.lyricFont['font'] = 'EZOmega'
         self.lyricFont['font_size'] = 12
+
+    def parseFile(self):
+        try:
+            bnmlTree = ET.parse(self.fileName)
+            bnml = bnmlTree.getroot()
+            self.bnml = bnml
+
+        except ET.ParseError:
+            print "Failed to parse XML file"
+
+    def createPDF(self):
+        """Create PDF output file"""
 
         # Parse page layout and formatting
         if (self.bnml is not None):
