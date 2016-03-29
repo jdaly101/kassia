@@ -96,7 +96,8 @@ class Kassia:
             if (title_elem is not None):
                 title_text = title_elem.text.strip()
                 title_attrib = title_elem.attrib
-                self.titleAttrib.update(self.fill_text_dict(title_attrib))
+                settings_from_xml = self.fill_text_dict(title_attrib)
+                self.titleAttrib.update(settings_from_xml)
 
                 c.setFillColor(self.titleAttrib['color'])
 
@@ -111,17 +112,16 @@ class Kassia:
             if (neume_elem is not None):
                 neumesText = " ".join(neume_elem.text.strip().split())
                 neume_attrib = neume_elem.attrib
-                # Update the defaults with info from the xml
-                temp_dict = self.fill_text_dict(neume_attrib)
-                self.neumeFont.update(temp_dict)
+                settings_from_xml = self.fill_text_dict(neume_attrib)
+                self.neumeFont.update(settings_from_xml)
 
             # Get attributes for lyrics
             lyric_elem = troparion.find('lyrics')
             if (lyric_elem is not None):
                 lyricsText = " ".join(lyric_elem.text.strip().split())
                 lyric_attrib = lyric_elem.attrib
-                temp_dict = self.fill_text_dict(lyric_attrib)
-                self.lyricFont.update(temp_dict)
+                settings_from_xml = self.fill_text_dict(lyric_attrib)
+                self.lyricFont.update(settings_from_xml)
 
             firstLineOffset = 0     # Offset from dropcap char
             lineSpacing = 72
