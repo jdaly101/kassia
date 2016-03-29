@@ -4,10 +4,10 @@
         <title color="#1111ff" font_size="18" font="EZOmega">
             Lord, I Have Cried
         </title>
-        <tone>
-            1
-        </tone>
         <rightannotation type="chronos" symbol="argon">
+        <mode color="#cf232b" font_size="20" font="EZSpecial-II">
+            h A q T
+        </mode>
             84
         </rightannotation>
         <rightannotation>

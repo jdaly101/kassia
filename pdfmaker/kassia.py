@@ -44,10 +44,15 @@ class Kassia:
         self.pageAttrib['line_height'] = 72
         self.pageAttrib['line_width'] = self.pageAttrib['paper_size'][0] - (self.pageAttrib['left_margin'] + self.pageAttrib['right_margin'])
 
-        psalticaTTF = "fonts/EZ Psaltica.TTF"
-        oxeiaTTF    = "fonts/EZ Oxeia.ttf"
-        omegaTTF    = "fonts/EZ Omega.ttf"
+        psalticaTTF     = "fonts/EZ Psaltica.TTF"
+        specialOneTTF   = "fonts/EZ Special-I.TTF"
+        specialTwoTTF   = "fonts/EZ Special-II.TTF"
+        oxeiaTTF        = "fonts/EZ Oxeia.ttf"
+        omegaTTF        = "fonts/EZ Omega.ttf"
+
         pdfmetrics.registerFont(TTFont("EZPsaltica",psalticaTTF,asciiReadable=True))
+        pdfmetrics.registerFont(TTFont("EZSpecial-I",specialOneTTF,asciiReadable=True))
+        pdfmetrics.registerFont(TTFont("EZSpecial-II",specialTwoTTF,asciiReadable=True))
         pdfmetrics.registerFont(TTFont("EZOxeia",oxeiaTTF))
         pdfmetrics.registerFont(TTFont("EZOmega",omegaTTF))
 
@@ -56,6 +61,12 @@ class Kassia:
         self.titleAttrib['font'] = 'EZOmega'
         self.titleAttrib['font_size'] = 18
         self.titleAttrib['color'] = colors.black
+
+        # Set mode defaults
+        self.modeAttrib = {}
+        self.modeAttrib['font'] = 'EZSpecial-II'
+        self.modeAttrib['font_size'] = 24
+        self.modeAttrib['color'] = colors.black
 
         # Set neume defaults
         self.neumeFont = {}
@@ -104,12 +115,29 @@ class Kassia:
                 vert_pos -= self.titleAttrib['font_size'] + 10
                 c.setFont(self.titleAttrib['font'],self.titleAttrib['font_size'])
                 c.drawCentredString(self.pageAttrib['paper_size'][0]/2,vert_pos,title_text)
-                vert_pos -= 36
+            c.setFillColor(colors.black)
+
+            # Draw mode
+            mode_elem = troparion.find('mode')
+            if (mode_elem is not None):
+                mode_text = mode_elem.text.strip()
+                mode_text = neume_dict.translate(mode_text)
+
+                mode_attrib = mode_elem.attrib
+                settings_from_xml = self.fill_text_dict(mode_attrib)
+                self.modeAttrib.update(settings_from_xml)
+
+                vert_pos -= 36 + (self.modeAttrib['font_size'] + 10)
+
+                c.setFillColor(self.modeAttrib['color'])
+                c.setFont(self.modeAttrib['font'],self.modeAttrib['font_size'])
+                c.drawCentredString(self.pageAttrib['paper_size'][0]/2,vert_pos,mode_text)
             c.setFillColor(colors.black)
 
             # Get attributes for neumes
             neume_elem = troparion.find('neumes')
             if (neume_elem is not None):
+                #vert_pos -= 16
                 neumesText = " ".join(neume_elem.text.strip().split())
                 neume_attrib = neume_elem.attrib
                 settings_from_xml = self.fill_text_dict(neume_attrib)
