@@ -67,6 +67,7 @@ class Kassia:
         self.modeAttrib['font'] = 'EZSpecial-II'
         self.modeAttrib['font_size'] = 24
         self.modeAttrib['color'] = colors.black
+        self.modeAttrib['align'] = 'center'
 
         # Set neume defaults
         self.neumeFont = {}
@@ -131,7 +132,18 @@ class Kassia:
 
                 c.setFillColor(self.modeAttrib['color'])
                 c.setFont(self.modeAttrib['font'],self.modeAttrib['font_size'])
-                c.drawCentredString(self.pageAttrib['paper_size'][0]/2,vert_pos,mode_text)
+
+                # Draw text, default to centered
+                if self.modeAttrib['align'] == 'left':
+                    x_pos = self.pageAttrib['left_margin']
+                    c.drawString(x_pos,vert_pos,mode_text)
+                elif self.modeAttrib['align'] == 'right':
+                    x_pos = self.pageAttrib['paper_size'][0] - self.pageAttrib['right_margin']
+                    c.drawRightString(x_pos,vert_pos,mode_text)
+                else:
+                    x_pos = self.pageAttrib['paper_size'][0]/2
+                    c.drawCentredString(x_pos,vert_pos,mode_text)
+
             c.setFillColor(colors.black)
 
             # Get attributes for neumes
