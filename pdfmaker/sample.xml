@@ -1,13 +1,13 @@
 <bnml top_margin="72" bottom_margin="72" left_margin="72" right_margin="72" line_height="72">
 
     <troparion>
-        <title color="#1111ff" font_size="18" font="EZOmega">
+        <title color="#1111ff" font_size="18" font="EZOmega" top_margin="10">
             Lord, I Have Cried
         </title>
-        <mode color="#cf232b" font_size="20" font="EZSpecial-II" align="center">
+        <mode color="#cf232b" font_size="20" font="EZSpecial-II" align="center" top_margin="30">
             h q T
         </mode>
-        <annotation color="#cf232b" font_size="20" font="EZSpecial-I" align="right" translate="true">
+        <annotation color="#cf232b" font_size="20" font="EZSpecial-I" align="right" translate="true" top_margin="-30">
             s
         </annotation>
         <annotation color="#1111ff" font_size="12" font="EZOmega" align="right">

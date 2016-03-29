@@ -62,6 +62,7 @@ class Kassia:
         self.titleAttrib['font'] = 'EZOmega'
         self.titleAttrib['font_size'] = 18
         self.titleAttrib['color'] = colors.black
+        self.titleAttrib['top_margin'] = 10
 
         # Set mode defaults
         self.modeAttrib = {}
@@ -69,10 +70,13 @@ class Kassia:
         self.modeAttrib['font_size'] = 24
         self.modeAttrib['color'] = colors.black
         self.modeAttrib['align'] = 'center'
+        self.modeAttrib['top_margin'] = 10
 
+        # Set annotation defaults
         self.annotationAttrib = {}
         self.annotationAttrib['font'] = 'EZOmega'
         self.annotationAttrib['font_size'] = 12
+        self.annotationAttrib['top_margin'] = 10
 
         # Set neume defaults
         self.neumeFont = {}
@@ -118,7 +122,8 @@ class Kassia:
 
                 c.setFillColor(self.titleAttrib['color'])
 
-                vert_pos -= self.titleAttrib['font_size'] + 10
+                vert_pos -= (self.titleAttrib['font_size'] + self.titleAttrib['top_margin'])
+
                 c.setFont(self.titleAttrib['font'],self.titleAttrib['font_size'])
                 c.drawCentredString(self.pageAttrib['paper_size'][0]/2,vert_pos,title_text)
 
@@ -132,7 +137,7 @@ class Kassia:
                 settings_from_xml = self.fill_text_dict(mode_attrib)
                 self.modeAttrib.update(settings_from_xml)
 
-                vert_pos -= 36 + (self.modeAttrib['font_size'] + 10)
+                vert_pos -= (self.modeAttrib['font_size'] + self.modeAttrib['top_margin'])
 
                 c.setFillColor(self.modeAttrib['color'])
                 c.setFont(self.modeAttrib['font'],self.modeAttrib['font_size'])
@@ -150,20 +155,19 @@ class Kassia:
 
             # Draw annotations
             for annotation_elem in troparion.iter('annotation'):
-                mode_text = annotation_elem.text.strip()
-
-                # Translate if using the EZ fonts
-                if annotation_elem.attrib.has_key('translate'):
-                    mode_text = neume_dict.translate(mode_text)
+                # Use a copy, since there could be multiple annotations
+                annotationAttribCopy = deepcopy(self.annotationAttrib)
 
                 annotation_attrib = annotation_elem.attrib
                 settings_from_xml = self.fill_text_dict(annotation_attrib)
-
-                # Use a copy, since there could be multiple annotations
-                annotationAttribCopy = deepcopy(self.annotationAttrib)
                 annotationAttribCopy.update(settings_from_xml)
 
-                vert_pos -= (annotationAttribCopy['font_size'] + 10)
+                # Translate text with neume_dict if specified (for EZ fonts)
+                mode_text = annotation_elem.text.strip()
+                if annotation_elem.attrib.has_key('translate'):
+                    mode_text = neume_dict.translate(mode_text)
+
+                vert_pos -= (annotationAttribCopy['font_size'] + annotationAttribCopy['top_margin'])
 
                 c.setFillColor(annotationAttribCopy['color'])
                 c.setFont(annotationAttribCopy['font'],annotationAttribCopy['font_size'])
