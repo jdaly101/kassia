@@ -77,10 +77,16 @@ class Kassia:
         self.neumeFont['font'] = 'EZPsaltica'
         self.neumeFont['font_size'] = 20
 
+        # Set dropcap defaults
+        self.dropCap = {}
+        #self.dropCap['font'] = 'EZOmega'
+        #self.dropCap['font_size'] = 40
+
         # Set lyric defaults
         self.lyricFont = {}
         self.lyricFont['font'] = 'EZOmega'
         self.lyricFont['font_size'] = 12
+        self.lyricFont['offset'] = 0
 
     def parseFile(self):
         try:
@@ -159,6 +165,15 @@ class Kassia:
                 settings_from_xml = self.fill_text_dict(neume_attrib)
                 self.neumeFont.update(settings_from_xml)
 
+            # Get attributes for drop cap
+            dropcap_elem = troparion.find('dropcap')
+            if (dropcap_elem is not None):
+                dropcap_attrib = dropcap_elem.attrib
+                settings_from_xml = self.fill_text_dict(dropcap_attrib)
+                self.dropCap.update(settings_from_xml)
+
+                self.dropCap['letter'] = dropcap_elem.text.strip()
+
             # Get attributes for lyrics
             lyric_elem = troparion.find('lyrics')
             if (lyric_elem is not None):
@@ -167,7 +182,14 @@ class Kassia:
                 settings_from_xml = self.fill_text_dict(lyric_attrib)
                 self.lyricFont.update(settings_from_xml)
 
-            firstLineOffset = 0     # Offset from dropcap char
+            # Offset for dropcap char
+            if self.dropCap.has_key('letter'):
+                firstLineOffset = 5 + pdfmetrics.stringWidth(self.dropCap['letter'],self.dropCap['font'],self.dropCap['font_size'])
+                # Remove first letter of lyrics, since it will be in drop cap
+                lyricsText = lyricsText[1:]
+            else:
+                firstLineOffset = 0
+
             lineSpacing = 72
 
             c.setFillColor(colors.black)
@@ -175,7 +197,19 @@ class Kassia:
             neumeChunks = neume_dict.chunkNeumes(neumesText)
             gArray = self.makeGlyphArray(neumeChunks,lyricsText)
             gArray = self.line_break2(gArray,firstLineOffset)
-            
+
+            # Draw Drop Cap
+            if self.dropCap.has_key('letter'):
+                firstNeume = gArray[0]
+
+                c.setFillColor(self.dropCap['color'])
+                c.setFont(self.dropCap['font'],self.dropCap['font_size'])
+
+                xpos = self.pageAttrib['left_margin']
+                ypos = vert_pos - (lineSpacing + self.lyricFont['offset'])
+
+                c.drawString(xpos,ypos,self.dropCap['letter'])
+
             for ga in gArray:
                 # TO DO: check if cursor has reached the end of the page
                 c.setFont(self.neumeFont['font'],self.neumeFont['font_size'])
@@ -183,7 +217,7 @@ class Kassia:
                 ypos = vert_pos - (ga.lineNum + 1)*lineSpacing
                 c.drawString(xpos,ypos, ga.neumes)
 
-                lyricOffset = 10
+                lyricOffset = self.lyricFont['offset']
 
                 if (ga.lyrics):
                     ypos -= lyricOffset
@@ -352,6 +386,14 @@ class Kassia:
                 print "Top margin error: {}".format(e)
                 # Get rid of xml font size, will use default later
                 title_dict.pop('top_margin')
+
+        """parse the offset size"""
+        if title_dict.has_key('offset'):
+            try:
+                title_dict['offset'] = int(title_dict['offset'])
+            except ValueError as e:
+                print "Offset size error: {}".format(e)
+                title_dict.pop('offset')
 
         return title_dict
 

@@ -19,7 +19,10 @@
             1 ~ 1 ' _ ! S : P S ! \ ! ! 1 o O S \ !
             A ) S 1 " s ! 0 a v V
         </neumes>
-        <lyrics font_size="12" font="EZOmega">
+        <dropcap color="#000000" font_size="40" font="EZOmega">
+            L
+        </dropcap>
+        <lyrics font_size="12" font="EZOmega" offset="10">
             Lord,_ _ I have cried_ _ un- - to_ _ _ Thee,_ _ heark- en un- - to_ _ _ me;
             hear- - ken_ _ un- - to_ _ me,_ _ _ O_ _  _ _ Lord. Lord_ _ I have cried_ _ _ un-
         </lyrics>
