@@ -10,6 +10,7 @@ import reportlab.lib.colors as colors
 import sys
 import xml.etree.ElementTree as ET
 import re
+from copy import deepcopy
 
 class Cursor:
     def __init__(self,x=0,y=0):
@@ -69,6 +70,10 @@ class Kassia:
         self.modeAttrib['color'] = colors.black
         self.modeAttrib['align'] = 'center'
 
+        self.annotationAttrib = {}
+        self.annotationAttrib['font'] = 'EZOmega'
+        self.annotationAttrib['font_size'] = 12
+
         # Set neume defaults
         self.neumeFont = {}
         self.neumeFont['font'] = 'EZPsaltica'
@@ -116,7 +121,6 @@ class Kassia:
                 vert_pos -= self.titleAttrib['font_size'] + 10
                 c.setFont(self.titleAttrib['font'],self.titleAttrib['font_size'])
                 c.drawCentredString(self.pageAttrib['paper_size'][0]/2,vert_pos,title_text)
-            c.setFillColor(colors.black)
 
             # Draw mode
             mode_elem = troparion.find('mode')
@@ -144,12 +148,40 @@ class Kassia:
                     x_pos = self.pageAttrib['paper_size'][0]/2
                     c.drawCentredString(x_pos,vert_pos,mode_text)
 
-            c.setFillColor(colors.black)
+            # Draw annotations
+            for annotation_elem in troparion.iter('annotation'):
+                mode_text = annotation_elem.text.strip()
+
+                # Translate if using the EZ fonts
+                if annotation_elem.attrib.has_key('translate'):
+                    mode_text = neume_dict.translate(mode_text)
+
+                annotation_attrib = annotation_elem.attrib
+                settings_from_xml = self.fill_text_dict(annotation_attrib)
+
+                # Use a copy, since there could be multiple annotations
+                annotationAttribCopy = deepcopy(self.annotationAttrib)
+                annotationAttribCopy.update(settings_from_xml)
+
+                vert_pos -= (annotationAttribCopy['font_size'] + 10)
+
+                c.setFillColor(annotationAttribCopy['color'])
+                c.setFont(annotationAttribCopy['font'],annotationAttribCopy['font_size'])
+
+                # Draw text, default to centered
+                if annotationAttribCopy['align'] == 'left':
+                    x_pos = self.pageAttrib['left_margin']
+                    c.drawString(x_pos,vert_pos,mode_text)
+                elif annotationAttribCopy['align'] == 'right':
+                    x_pos = self.pageAttrib['paper_size'][0] - self.pageAttrib['right_margin']
+                    c.drawRightString(x_pos,vert_pos,mode_text)
+                else:
+                    x_pos = self.pageAttrib['paper_size'][0]/2
+                    c.drawCentredString(x_pos,vert_pos,mode_text)
 
             # Get attributes for neumes
             neume_elem = troparion.find('neumes')
             if (neume_elem is not None):
-                #vert_pos -= 16
                 neumesText = " ".join(neume_elem.text.strip().split())
                 neume_attrib = neume_elem.attrib
                 settings_from_xml = self.fill_text_dict(neume_attrib)
@@ -165,6 +197,8 @@ class Kassia:
 
             firstLineOffset = 0     # Offset from dropcap char
             lineSpacing = 72
+
+            c.setFillColor(colors.black)
 
             neumeChunks = neume_dict.chunkNeumes(neumesText)
             gArray = self.makeGlyphArray(neumeChunks,lyricsText)
