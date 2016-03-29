@@ -368,12 +368,22 @@ class Kassia:
                 title_dict.pop('color')
 
         """parse the font size"""
-        try:
-            title_dict['font_size'] = int(title_dict['font_size'])
-        except ValueError as e:
-            print "Font size error: {}".format(e)
-            # Get rid of xml font size, will use default later
-            title_dict.pop('font_size')
+        if title_dict.has_key('font_size'):
+            try:
+                title_dict['font_size'] = int(title_dict['font_size'])
+            except ValueError as e:
+                print "Font size error: {}".format(e)
+                # Get rid of xml font size, will use default later
+                title_dict.pop('font_size')
+
+        """parse the top margin"""
+        if title_dict.has_key('top_margin'):
+            try:
+                title_dict['top_margin'] = int(title_dict['top_margin'])
+            except ValueError as e:
+                print "Top margin error: {}".format(e)
+                # Get rid of xml font size, will use default later
+                title_dict.pop('top_margin')
 
         return title_dict
 
