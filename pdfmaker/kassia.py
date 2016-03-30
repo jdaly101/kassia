@@ -29,42 +29,66 @@ class Kassia:
             print "Not readable"
         
         if fileReadable:
+            self.setDefaults()
             self.parseFile()
             self.createPDF()
-        
-    def parseFile(self):
-        try:
-            bnmlTree = ET.parse(self.fileName)
-            bnml = bnmlTree.getroot()
-            self.bnml = bnml   
-               
-        except ET.ParseError:
-            print "Failed to parse XML file"
-            
-    def createPDF(self):
-        """Create PDF output file"""
-        # TODO: Parse page layout and formatting
-        self.paperSize = letter
-        self.topmargin = 72
-        self.bottommargin = 72
-        self.leftmargin = 72
-        self.rightmargin = 72
-        self.lineHeight = 72
-        self.lineWidth = self.paperSize[0] - (self.leftmargin + self.rightmargin)
-        self.nFontSize = 20
-        self.lFontSize = 12
-        
+
+    def setDefaults(self):
+        # Set page defaults
+        self.pageAttrib = {}
+        self.pageAttrib['paper_size'] = letter
+        self.pageAttrib['top_margin'] = 72
+        self.pageAttrib['bottom_margin'] = 72
+        self.pageAttrib['left_margin'] = 72
+        self.pageAttrib['right_margin'] = 72
+        self.pageAttrib['line_height'] = 72
+        self.pageAttrib['line_width'] = self.pageAttrib['paper_size'][0] - (self.pageAttrib['left_margin'] + self.pageAttrib['right_margin'])
+
         psalticaTTF = "fonts/EZ Psaltica.TTF"
         oxeiaTTF    = "fonts/EZ Oxeia.ttf"
         omegaTTF    = "fonts/EZ Omega.ttf"
         pdfmetrics.registerFont(TTFont("EZPsaltica",psalticaTTF,asciiReadable=True))
         pdfmetrics.registerFont(TTFont("EZOxeia",oxeiaTTF))
         pdfmetrics.registerFont(TTFont("EZOmega",omegaTTF))
-        
+
+        # Set title defaults
+        self.titleAttrib = {}
+        self.titleAttrib['font'] = 'EZOmega'
+        self.titleAttrib['font_size'] = 18
+        self.titleAttrib['color'] = colors.black
+
+        # Set neume defaults
+        self.neumeFont = {}
+        self.neumeFont['font'] = 'EZPsaltica'
+        self.neumeFont['font_size'] = 20
+
+        # Set lyric defaults
+        self.lyricFont = {}
+        self.lyricFont['font'] = 'EZOmega'
+        self.lyricFont['font_size'] = 12
+
+    def parseFile(self):
+        try:
+            bnmlTree = ET.parse(self.fileName)
+            bnml = bnmlTree.getroot()
+            self.bnml = bnml
+
+        except ET.ParseError:
+            print "Failed to parse XML file"
+
+    def createPDF(self):
+        """Create PDF output file"""
+
+        # Parse page layout and formatting
+        if (self.bnml is not None):
+            margin_attrib = self.bnml.attrib
+            temp_dict = self.fill_page_dict(margin_attrib)
+            self.pageAttrib.update(temp_dict)
+
         c = canvas.Canvas(self.outFile,pagesize = letter)
-        vSpace = self.paperSize[1] - self.topmargin  
-        vert_pos = self.paperSize[1] - self.topmargin             
-        
+        vSpace = self.pageAttrib['paper_size'][1] - self.pageAttrib['top_margin']
+        vert_pos = self.pageAttrib['paper_size'][1] - self.pageAttrib['top_margin']
+
         # For each tropar
         for troparion in self.bnml.iter('troparion'):
             # Draw title if there is one
@@ -72,23 +96,32 @@ class Kassia:
             if (title_elem is not None):
                 title_text = title_elem.text.strip()
                 title_attrib = title_elem.attrib
-                title_attrib = self.fill_title_dict(title_attrib)
+                settings_from_xml = self.fill_text_dict(title_attrib)
+                self.titleAttrib.update(settings_from_xml)
 
-                c.setFillColor(title_attrib['color'])
-                
-                vert_pos -= title_attrib['font_size'] + 10
-                c.setFont('EZOmega',title_attrib['font_size'])
-                c.drawCentredString(self.paperSize[0]/2,vert_pos,title_text)
+                c.setFillColor(self.titleAttrib['color'])
+
+                vert_pos -= self.titleAttrib['font_size'] + 10
+                c.setFont(self.titleAttrib['font'],self.titleAttrib['font_size'])
+                c.drawCentredString(self.pageAttrib['paper_size'][0]/2,vert_pos,title_text)
                 vert_pos -= 36
             c.setFillColor(colors.black)
 
-            neumesText = " ".join(troparion.find('neumes').text.strip().split())
-            lyricsText = " ".join(troparion.find('lyrics').text.strip().split())
+            # Get attributes for neumes
+            neume_elem = troparion.find('neumes')
+            if (neume_elem is not None):
+                neumesText = " ".join(neume_elem.text.strip().split())
+                neume_attrib = neume_elem.attrib
+                settings_from_xml = self.fill_text_dict(neume_attrib)
+                self.neumeFont.update(settings_from_xml)
 
-            self.neumeFont = "EZPsaltica"
-            self.neumeFontSize = 20
-            self.lyricFont = "EZOmega"
-            self.lyricFontSize = 12
+            # Get attributes for lyrics
+            lyric_elem = troparion.find('lyrics')
+            if (lyric_elem is not None):
+                lyricsText = " ".join(lyric_elem.text.strip().split())
+                lyric_attrib = lyric_elem.attrib
+                settings_from_xml = self.fill_text_dict(lyric_attrib)
+                self.lyricFont.update(settings_from_xml)
 
             firstLineOffset = 0     # Offset from dropcap char
             lineSpacing = 72
@@ -99,8 +132,8 @@ class Kassia:
             
             for ga in gArray:
                 # TO DO: check if cursor has reached the end of the page
-                c.setFont(self.neumeFont,self.nFontSize)
-                xpos = self.leftmargin + ga.neumePos
+                c.setFont(self.neumeFont['font'],self.neumeFont['font_size'])
+                xpos = self.pageAttrib['left_margin'] + ga.neumePos
                 ypos = vert_pos - (ga.lineNum + 1)*lineSpacing
                 c.drawString(xpos,ypos, ga.neumes)
 
@@ -108,8 +141,8 @@ class Kassia:
 
                 if (ga.lyrics):
                     ypos -= lyricOffset
-                    xpos = self.leftmargin + ga.lyricPos
-                    c.setFont(self.lyricFont,self.lFontSize)
+                    xpos = self.pageAttrib['left_margin'] + ga.lyricPos
+                    c.setFont(self.lyricFont['font'],self.lyricFont['font_size'])
                     #if (ga.lyrics[-1] == "_"):
                     #    ga.lyrics += "_"
                     c.drawString(xpos,ypos,ga.lyrics)
@@ -144,8 +177,8 @@ class Kassia:
             else: 
                 # no lyric needed
                 g = Glyph(neume_dict.translate(nc))
-            g.calc_width()
-            
+            g.calc_width(self.neumeFont['font'], self.neumeFont['font_size'], self.lyricFont['font'], self.lyricFont['font_size'])
+
             gArray.append(g)
             i += 1
         return gArray
@@ -158,7 +191,7 @@ class Kassia:
 
         # should be able to override these params in xml
         charSpace = 2 # avg spacing between characters
-        lineWidth = self.lineWidth
+        lineWidth = self.pageAttrib['line_width']
 
         nlines = 0
         for g in glyphArray:
@@ -205,7 +238,7 @@ class Kassia:
                     lyr = lyricArray[lyricIdx]
                 else:
                     lyr = ""
-                lWidth = pdfmetrics.stringWidth(lyr,'EZOmega',self.lFontSize)
+                lWidth = pdfmetrics.stringWidth(lyr,lyric_attrib['font'],lyric_attrib['font_size'])
                 # Glyph width will be the max of the two if lyric isn't stretched out
                 # across multiple neumes
                 addLyric = False
@@ -239,26 +272,30 @@ class Kassia:
         #print neumePos
         return neumePos, lyricPos
 
-    def fill_title_dict(self, title_dict):
-        if not title_dict.has_key('color'):
-           tmp_col = colors.Color(0,0,1,1)
-        else:
-            """parse the color"""
+    def fill_page_dict(self, page_dict):
+        # TO DO: better error handling; value could be empty string
+        for attrib_name in page_dict:
+            page_dict[attrib_name] = int(page_dict[attrib_name])
+        return page_dict
+
+    def fill_text_dict(self, title_dict):
+        """parse the color"""
+        if title_dict.has_key('color'):
             if title_dict['color'] == "blue":
                 title_dict['color'] = colors.blue
             elif re.match("#[0-9a-fA-F]{6}",title_dict['color']):
                 col = [z/255. for z in hex_to_rgb(title_dict['color'])]
                 title_dict['color'] = colors.Color(col[0],col[1],col[2],1)
             else:
-                title_dict['color'] = color.black
-        
-        if not title_dict.has_key('font_size'):
-            title_dict['font_size'] = 14
-        else:
+                title_dict.pop('color')
+
+        """parse the font size"""
+        try:
             title_dict['font_size'] = int(title_dict['font_size'])
-        
-        if not title_dict.has_key('font'):
-            title_dict['font'] = "EZOmega"
+        except ValueError as e:
+            print "Font size error: {}".format(e)
+            # Get rid of xml font size, will use default later
+            title_dict.pop('font_size')
 
         return title_dict
 
