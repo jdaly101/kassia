@@ -64,18 +64,12 @@ class Kassia:
         self.titleAttrib['color'] = colors.black
         self.titleAttrib['top_margin'] = 10
 
-        # Set mode defaults
-        self.modeAttrib = {}
-        self.modeAttrib['font'] = 'EZSpecial-II'
-        self.modeAttrib['font_size'] = 24
-        self.modeAttrib['color'] = colors.black
-        self.modeAttrib['align'] = 'center'
-        self.modeAttrib['top_margin'] = 10
-
         # Set annotation defaults
         self.annotationAttrib = {}
         self.annotationAttrib['font'] = 'EZOmega'
         self.annotationAttrib['font_size'] = 12
+        self.annotationAttrib['color'] = colors.black
+        self.annotationAttrib['align'] = 'center'
         self.annotationAttrib['top_margin'] = 10
 
         # Set neume defaults
@@ -127,32 +121,6 @@ class Kassia:
                 c.setFont(self.titleAttrib['font'],self.titleAttrib['font_size'])
                 c.drawCentredString(self.pageAttrib['paper_size'][0]/2,vert_pos,title_text)
 
-            # Draw mode
-            mode_elem = troparion.find('mode')
-            if (mode_elem is not None):
-                mode_text = mode_elem.text.strip()
-                mode_text = neume_dict.translate(mode_text)
-
-                mode_attrib = mode_elem.attrib
-                settings_from_xml = self.fill_text_dict(mode_attrib)
-                self.modeAttrib.update(settings_from_xml)
-
-                vert_pos -= (self.modeAttrib['font_size'] + self.modeAttrib['top_margin'])
-
-                c.setFillColor(self.modeAttrib['color'])
-                c.setFont(self.modeAttrib['font'],self.modeAttrib['font_size'])
-
-                # Draw text, default to centered
-                if self.modeAttrib['align'] == 'left':
-                    x_pos = self.pageAttrib['left_margin']
-                    c.drawString(x_pos,vert_pos,mode_text)
-                elif self.modeAttrib['align'] == 'right':
-                    x_pos = self.pageAttrib['paper_size'][0] - self.pageAttrib['right_margin']
-                    c.drawRightString(x_pos,vert_pos,mode_text)
-                else:
-                    x_pos = self.pageAttrib['paper_size'][0]/2
-                    c.drawCentredString(x_pos,vert_pos,mode_text)
-
             # Draw annotations
             for annotation_elem in troparion.iter('annotation'):
                 # Use a copy, since there could be multiple annotations
@@ -163,9 +131,9 @@ class Kassia:
                 annotationAttribCopy.update(settings_from_xml)
 
                 # Translate text with neume_dict if specified (for EZ fonts)
-                mode_text = annotation_elem.text.strip()
-                if annotation_elem.attrib.has_key('translate'):
-                    mode_text = neume_dict.translate(mode_text)
+                annotation_text = annotation_elem.text.strip()
+                if annotationAttribCopy.has_key('translate'):
+                    annotation_text = neume_dict.translate(annotation_text)
 
                 vert_pos -= (annotationAttribCopy['font_size'] + annotationAttribCopy['top_margin'])
 
@@ -175,13 +143,13 @@ class Kassia:
                 # Draw text, default to centered
                 if annotationAttribCopy['align'] == 'left':
                     x_pos = self.pageAttrib['left_margin']
-                    c.drawString(x_pos,vert_pos,mode_text)
+                    c.drawString(x_pos,vert_pos,annotation_text)
                 elif annotationAttribCopy['align'] == 'right':
                     x_pos = self.pageAttrib['paper_size'][0] - self.pageAttrib['right_margin']
-                    c.drawRightString(x_pos,vert_pos,mode_text)
+                    c.drawRightString(x_pos,vert_pos,annotation_text)
                 else:
                     x_pos = self.pageAttrib['paper_size'][0]/2
-                    c.drawCentredString(x_pos,vert_pos,mode_text)
+                    c.drawCentredString(x_pos,vert_pos,annotation_text)
 
             # Get attributes for neumes
             neume_elem = troparion.find('neumes')

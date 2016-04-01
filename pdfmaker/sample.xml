@@ -4,9 +4,9 @@
         <title color="#1111ff" font_size="18" font="EZOmega" top_margin="10">
             Lord, I Have Cried
         </title>
-        <mode color="#cf232b" font_size="20" font="EZSpecial-II" align="center" top_margin="30">
+        <annotation color="#cf232b" font_size="20" font="EZSpecial-II" align="center" translate="true" top_margin="30">
             h q T
-        </mode>
+        </annotation>
         <annotation color="#cf232b" font_size="20" font="EZSpecial-I" align="right" translate="true" top_margin="-30">
             s
         </annotation>
