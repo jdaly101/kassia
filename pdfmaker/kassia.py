@@ -86,7 +86,7 @@ class Kassia:
         self.lyricFont = {}
         self.lyricFont['font'] = 'EZOmega'
         self.lyricFont['font_size'] = 12
-        self.lyricFont['offset'] = 0
+        self.lyricFont['top_margin'] = 0
 
     def parseFile(self):
         try:
@@ -206,7 +206,7 @@ class Kassia:
                 c.setFont(self.dropCap['font'],self.dropCap['font_size'])
 
                 xpos = self.pageAttrib['left_margin']
-                ypos = vert_pos - (lineSpacing + self.lyricFont['offset'])
+                ypos = vert_pos - (lineSpacing + self.lyricFont['top_margin'])
 
                 c.drawString(xpos,ypos,self.dropCap['letter'])
 
@@ -217,7 +217,7 @@ class Kassia:
                 ypos = vert_pos - (ga.lineNum + 1)*lineSpacing
                 c.drawString(xpos,ypos, ga.neumes)
 
-                lyricOffset = self.lyricFont['offset']
+                lyricOffset = self.lyricFont['top_margin']
 
                 if (ga.lyrics):
                     ypos -= lyricOffset
@@ -386,14 +386,6 @@ class Kassia:
                 print "Top margin error: {}".format(e)
                 # Get rid of xml font size, will use default later
                 title_dict.pop('top_margin')
-
-        """parse the offset size"""
-        if title_dict.has_key('offset'):
-            try:
-                title_dict['offset'] = int(title_dict['offset'])
-            except ValueError as e:
-                print "Offset size error: {}".format(e)
-                title_dict.pop('offset')
 
         return title_dict
 
