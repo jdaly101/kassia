@@ -1,9 +1,8 @@
-import neume_dict
+import neume_dict, font_reader
 from glyphs import Glyph, GlyphLine
 
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.pagesizes import letter
 import reportlab.lib.colors as colors
 
@@ -45,28 +44,18 @@ class Kassia:
         self.pageAttrib['line_height'] = 72
         self.pageAttrib['line_width'] = self.pageAttrib['paper_size'][0] - (self.pageAttrib['left_margin'] + self.pageAttrib['right_margin'])
 
-        psalticaTTF     = "fonts/EZ Psaltica.TTF"
-        specialOneTTF   = "fonts/EZ Special-I.TTF"
-        specialTwoTTF   = "fonts/EZ Special-II.TTF"
-        oxeiaTTF        = "fonts/EZ Oxeia.ttf"
-        omegaTTF        = "fonts/EZ Omega.ttf"
-
-        pdfmetrics.registerFont(TTFont("EZPsaltica",psalticaTTF,asciiReadable=True))
-        pdfmetrics.registerFont(TTFont("EZSpecial-I",specialOneTTF,asciiReadable=True))
-        pdfmetrics.registerFont(TTFont("EZSpecial-II",specialTwoTTF,asciiReadable=True))
-        pdfmetrics.registerFont(TTFont("EZOxeia",oxeiaTTF))
-        pdfmetrics.registerFont(TTFont("EZOmega",omegaTTF))
+        font_reader.registerFonts()
 
         # Set title defaults
         self.titleAttrib = {}
-        self.titleAttrib['font'] = 'EZOmega'
+        self.titleAttrib['font'] = 'EZ Omega'
         self.titleAttrib['font_size'] = 18
         self.titleAttrib['color'] = colors.black
         self.titleAttrib['top_margin'] = 10
 
         # Set annotation defaults
         self.annotationAttrib = {}
-        self.annotationAttrib['font'] = 'EZOmega'
+        self.annotationAttrib['font'] = 'EZ Omega'
         self.annotationAttrib['font_size'] = 12
         self.annotationAttrib['color'] = colors.black
         self.annotationAttrib['align'] = 'center'
@@ -74,7 +63,7 @@ class Kassia:
 
         # Set neume defaults
         self.neumeFont = {}
-        self.neumeFont['font'] = 'EZPsaltica'
+        self.neumeFont['font'] = 'EZ Psaltica'
         self.neumeFont['font_size'] = 20
 
         # Set dropcap defaults
@@ -84,7 +73,7 @@ class Kassia:
 
         # Set lyric defaults
         self.lyricFont = {}
-        self.lyricFont['font'] = 'EZOmega'
+        self.lyricFont['font'] = 'EZ Omega'
         self.lyricFont['font_size'] = 12
         self.lyricFont['top_margin'] = 0
 
@@ -310,8 +299,8 @@ class Kassia:
         lyricPos = []
         lyricIdx = 0
         for neume in neumeArray:
-            #print("Neume length: " + str(pdfmetrics.stringWidth(neume,'EZPsaltica',24)))
-            nWidth = pdfmetrics.stringWidth(neume_dict.translate(neume),'EZPsaltica',self.nFontSize)
+            #print("Neume length: " + str(pdfmetrics.stringWidth(neume,'EZ Psaltica',24)))
+            nWidth = pdfmetrics.stringWidth(neume_dict.translate(neume),'EZ Psaltica',self.nFontSize)
             if nWidth > 1.0: # if it's not a gorgon or other small symbol
                 # Neume might take lyric
                 if lyricIdx < len(lyricArray):

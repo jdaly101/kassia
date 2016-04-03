@@ -15,9 +15,9 @@ class Glyph:
         self.width  = 0     # glyph width
 
         self.lineNum = 0    # line number, to be determined by linebreaking algorithm
-         
-    def calc_width(self,neumeFont="EZPsaltica",neumeFontSize=20,
-                   lyricFont="EZOmega",lyricFontSize=12):
+
+    def calc_width(self,neumeFont="EZ Psaltica",neumeFontSize=20,
+                   lyricFont="EZ Omega",lyricFontSize=12):
         self.nWidth = pdfmetrics.stringWidth(self.neumes,neumeFont,neumeFontSize)
         self.lWidth = pdfmetrics.stringWidth(self.lyrics,lyricFont,lyricFontSize)
         self.width = max(self.nWidth,self.lWidth)
