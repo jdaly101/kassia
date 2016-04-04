@@ -96,7 +96,6 @@ class Kassia:
             self.pageAttrib.update(temp_dict)
 
         c = canvas.Canvas(self.outFile,pagesize = letter)
-        vSpace = self.pageAttrib['paper_size'][1] - self.pageAttrib['top_margin']
         vert_pos = self.pageAttrib['paper_size'][1] - self.pageAttrib['top_margin']
 
         # For each tropar
@@ -179,7 +178,7 @@ class Kassia:
             else:
                 firstLineOffset = 0
 
-            lineSpacing = 72
+            lineSpacing = self.pageAttrib['line_height']
 
             c.setFillColor(colors.black)
 
@@ -360,10 +359,10 @@ class Kassia:
 
         """parse the font"""
         if title_dict.has_key('font'):
-            if not font_reader.isRegisteredFont(self.title_dict['font']):
-                print "{} not found, using Helvetica font instead".format(self.title_dict['font'])
+            if not font_reader.isRegisteredFont(title_dict['font']):
+                print "{} not found, using Helvetica font instead".format(title_dict['font'])
                 # Helvetica is built into ReportLab, so we know it's safe
-                self.titleAttrib['font'] = "Helvetica"
+                title_dict['font'] = "Helvetica"
 
         """parse the font size"""
         if title_dict.has_key('font_size'):
