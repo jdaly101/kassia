@@ -10,6 +10,7 @@ import reportlab.lib.colors as colors
 import sys
 import xml.etree.ElementTree as ET
 import re
+from copy import deepcopy
 
 class Cursor:
     def __init__(self,x=0,y=0):
@@ -44,10 +45,15 @@ class Kassia:
         self.pageAttrib['line_height'] = 72
         self.pageAttrib['line_width'] = self.pageAttrib['paper_size'][0] - (self.pageAttrib['left_margin'] + self.pageAttrib['right_margin'])
 
-        psalticaTTF = "fonts/EZ Psaltica.TTF"
-        oxeiaTTF    = "fonts/EZ Oxeia.ttf"
-        omegaTTF    = "fonts/EZ Omega.ttf"
+        psalticaTTF     = "fonts/EZ Psaltica.TTF"
+        specialOneTTF   = "fonts/EZ Special-I.TTF"
+        specialTwoTTF   = "fonts/EZ Special-II.TTF"
+        oxeiaTTF        = "fonts/EZ Oxeia.ttf"
+        omegaTTF        = "fonts/EZ Omega.ttf"
+
         pdfmetrics.registerFont(TTFont("EZPsaltica",psalticaTTF,asciiReadable=True))
+        pdfmetrics.registerFont(TTFont("EZSpecial-I",specialOneTTF,asciiReadable=True))
+        pdfmetrics.registerFont(TTFont("EZSpecial-II",specialTwoTTF,asciiReadable=True))
         pdfmetrics.registerFont(TTFont("EZOxeia",oxeiaTTF))
         pdfmetrics.registerFont(TTFont("EZOmega",omegaTTF))
 
@@ -56,6 +62,15 @@ class Kassia:
         self.titleAttrib['font'] = 'EZOmega'
         self.titleAttrib['font_size'] = 18
         self.titleAttrib['color'] = colors.black
+        self.titleAttrib['top_margin'] = 10
+
+        # Set annotation defaults
+        self.annotationAttrib = {}
+        self.annotationAttrib['font'] = 'EZOmega'
+        self.annotationAttrib['font_size'] = 12
+        self.annotationAttrib['color'] = colors.black
+        self.annotationAttrib['align'] = 'center'
+        self.annotationAttrib['top_margin'] = 10
 
         # Set neume defaults
         self.neumeFont = {}
@@ -101,11 +116,40 @@ class Kassia:
 
                 c.setFillColor(self.titleAttrib['color'])
 
-                vert_pos -= self.titleAttrib['font_size'] + 10
+                vert_pos -= (self.titleAttrib['font_size'] + self.titleAttrib['top_margin'])
+
                 c.setFont(self.titleAttrib['font'],self.titleAttrib['font_size'])
                 c.drawCentredString(self.pageAttrib['paper_size'][0]/2,vert_pos,title_text)
-                vert_pos -= 36
-            c.setFillColor(colors.black)
+
+            # Draw annotations
+            for annotation_elem in troparion.iter('annotation'):
+                # Use a copy, since there could be multiple annotations
+                annotationAttribCopy = deepcopy(self.annotationAttrib)
+
+                annotation_attrib = annotation_elem.attrib
+                settings_from_xml = self.fill_text_dict(annotation_attrib)
+                annotationAttribCopy.update(settings_from_xml)
+
+                # Translate text with neume_dict if specified (for EZ fonts)
+                annotation_text = annotation_elem.text.strip()
+                if annotationAttribCopy.has_key('translate'):
+                    annotation_text = neume_dict.translate(annotation_text)
+
+                vert_pos -= (annotationAttribCopy['font_size'] + annotationAttribCopy['top_margin'])
+
+                c.setFillColor(annotationAttribCopy['color'])
+                c.setFont(annotationAttribCopy['font'],annotationAttribCopy['font_size'])
+
+                # Draw text, default to centered
+                if annotationAttribCopy['align'] == 'left':
+                    x_pos = self.pageAttrib['left_margin']
+                    c.drawString(x_pos,vert_pos,annotation_text)
+                elif annotationAttribCopy['align'] == 'right':
+                    x_pos = self.pageAttrib['paper_size'][0] - self.pageAttrib['right_margin']
+                    c.drawRightString(x_pos,vert_pos,annotation_text)
+                else:
+                    x_pos = self.pageAttrib['paper_size'][0]/2
+                    c.drawCentredString(x_pos,vert_pos,annotation_text)
 
             # Get attributes for neumes
             neume_elem = troparion.find('neumes')
@@ -125,6 +169,8 @@ class Kassia:
 
             firstLineOffset = 0     # Offset from dropcap char
             lineSpacing = 72
+
+            c.setFillColor(colors.black)
 
             neumeChunks = neume_dict.chunkNeumes(neumesText)
             gArray = self.makeGlyphArray(neumeChunks,lyricsText)
@@ -290,12 +336,22 @@ class Kassia:
                 title_dict.pop('color')
 
         """parse the font size"""
-        try:
-            title_dict['font_size'] = int(title_dict['font_size'])
-        except ValueError as e:
-            print "Font size error: {}".format(e)
-            # Get rid of xml font size, will use default later
-            title_dict.pop('font_size')
+        if title_dict.has_key('font_size'):
+            try:
+                title_dict['font_size'] = int(title_dict['font_size'])
+            except ValueError as e:
+                print "Font size error: {}".format(e)
+                # Get rid of xml font size, will use default later
+                title_dict.pop('font_size')
+
+        """parse the top margin"""
+        if title_dict.has_key('top_margin'):
+            try:
+                title_dict['top_margin'] = int(title_dict['top_margin'])
+            except ValueError as e:
+                print "Top margin error: {}".format(e)
+                # Get rid of xml font size, will use default later
+                title_dict.pop('top_margin')
 
         return title_dict
 

@@ -1,18 +1,18 @@
 <bnml top_margin="72" bottom_margin="72" left_margin="72" right_margin="72" line_height="72">
 
     <troparion>
-        <title color="#1111ff" font_size="18" font="EZOmega">
+        <title color="#1111ff" font_size="18" font="EZOmega" top_margin="10">
             Lord, I Have Cried
         </title>
-        <tone>
-            1
-        </tone>
-        <rightannotation type="chronos" symbol="argon">
-            84
-        </rightannotation>
-        <rightannotation>
+        <annotation color="#cf232b" font_size="20" font="EZSpecial-II" align="center" translate="true" top_margin="30">
+            h q T
+        </annotation>
+        <annotation color="#cf232b" font_size="20" font="EZSpecial-I" align="right" translate="true" top_margin="-30">
+            s
+        </annotation>
+        <annotation color="#1111ff" font_size="12" font="EZOmega" align="right">
             Kyrie ekekraxa
-        </rightannotation>
+        </annotation>
         <neumes font_size="20" font="EZPsaltica">
             O S ! ! 1 1 ' ! ! : } ! S \ 0 ! S 1 w !
             A | v V J 3 z U U S ! _ 1 " s ! 0 a v V
