@@ -1,28 +1,28 @@
 <bnml top_margin="72" bottom_margin="72" left_margin="72" right_margin="72" line_height="72">
 
     <troparion>
-        <title color="#1111ff" font_size="18" font="EZOmega" top_margin="10">
+        <title color="#1111ff" font_size="18" font="EZ Omega" top_margin="10">
             Lord, I Have Cried
         </title>
-        <annotation color="#cf232b" font_size="20" font="EZSpecial-II" align="center" translate="true" top_margin="30">
+        <annotation color="#cf232b" font_size="20" font="EZ Special-II" align="center" translate="true" top_margin="30">
             h q T
         </annotation>
-        <annotation color="#cf232b" font_size="20" font="EZSpecial-I" align="right" translate="true" top_margin="-30">
+        <annotation color="#cf232b" font_size="20" font="EZ Special-I" align="right" translate="true" top_margin="-30">
             s
         </annotation>
-        <annotation color="#1111ff" font_size="12" font="EZOmega" align="right">
+        <annotation color="#1111ff" font_size="12" font="EZ Omega" align="right">
             Kyrie ekekraxa
         </annotation>
-        <neumes font_size="20" font="EZPsaltica">
+        <neumes font_size="20" font="EZ Psaltica">
             O S ! ! 1 1 ' ! ! : } ! S \ 0 ! S 1 w !
             A | v V J 3 z U U S ! _ 1 " s ! 0 a v V
             1 ~ 1 ' _ ! S : P S ! \ ! ! 1 o O S \ !
             A ) S 1 " s ! 0 a v V
         </neumes>
-        <dropcap color="#000000" font_size="40" font="EZOmega">
+        <dropcap color="#000000" font_size="40" font="EZ Omega">
             L
         </dropcap>
-        <lyrics font_size="12" font="EZOmega" offset="10">
+        <lyrics font_size="12" font="EZ Omega" offset="10">
             Lord,_ _ I have cried_ _ un- - to_ _ _ Thee,_ _ heark- en un- - to_ _ _ me;
             hear- - ken_ _ un- - to_ _ me,_ _ _ O_ _  _ _ Lord. Lord_ _ I have cried_ _ _ un-
         </lyrics>
