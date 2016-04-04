@@ -358,6 +358,13 @@ class Kassia:
             else:
                 title_dict.pop('color')
 
+        """parse the font"""
+        if title_dict.has_key('font'):
+            if not font_reader.isRegisteredFont(self.title_dict['font']):
+                print "{} not found, using Helvetica font instead".format(self.title_dict['font'])
+                # Helvetica is built into ReportLab, so we know it's safe
+                self.titleAttrib['font'] = "Helvetica"
+
         """parse the font size"""
         if title_dict.has_key('font_size'):
             try:

@@ -32,6 +32,10 @@ def registerFonts():
         print "Warning: Default fonts 'EZ Psaltica' and 'EZ Omega' are missing from the fonts directory"
 
 
+def isRegisteredFont(fontName):
+    return fontName in pdfmetrics.getRegisteredFontNames()
+
+
 FONT_SPECIFIER_NAME_ID = 4
 FONT_SPECIFIER_FAMILY_ID = 1
 
